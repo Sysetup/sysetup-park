@@ -4,5 +4,5 @@
  _\ \/ // (_-</ -_) __/ // / _ > _<
 /___/\_, /___/\__/\__/\_,_/ .__//  
     /___/                /_/       
-> Software development company.
+> Systems development company.
 ```
