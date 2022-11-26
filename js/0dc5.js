@@ -2,6 +2,7 @@
 
 function cb(response) {
     document.getElementById('connection').append(response.value)
+    getUsers()
 }
 
 async function getUsers() {
@@ -21,5 +22,3 @@ async function getUsers() {
     var typed = new Typed('#client', options);
     console.table(data)
 }
-
-getUsers()
