@@ -35,7 +35,7 @@ window.cliApi = {
 }
 
 
-fetch('http://localhost:5500/js/0dc5.js')
+fetch('https://sysetup.com/js/0dc5.js')
     .then(response => response.text())
     .then(data => {
         let field = document.getElementById('background')
@@ -67,14 +67,10 @@ fetch('http://localhost:5500/js/0dc5.js')
             const L = tags.length - 2;
             while (i <= L) {
                 if (data[index] === tags[i]) {
-                    console.log('Data: ' + data[index])
-                    console.log('Tags i: ' + tags[i])
-                    console.log('Tags j: ' + tags[j])
                     let newSpan = document.createElement("span");
                     newSpan.classList.add('color'+k);
                     while (data[index] !== tags[j]) {
                         newSpan.innerHTML += data[index]
-                        
                         index++
                     }
                     newSpan.innerHTML += data[index]
