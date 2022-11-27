@@ -35,40 +35,56 @@ window.cliApi = {
 }
 
 
-fetch('http://localhost:5500/js/1.js')
+fetch('http://localhost:5500/js/0dc5.js')
     .then(response => response.text())
     .then(data => {
         let field = document.getElementById('background')
         let dataB = data.replaceAll(';', ';\n\n')
         let index = 0
         function setupTypeWriter(data, field) {
-            let speed = 4
-            let tags = [true,'(',')','{','}']
+            let speed = 1
+            let tags = [true, '(', ')', '{', '}', '<', '>', '[',']']
             let intervalID = setInterval(() => {
                 if (data.length > index) {
-                    if (tags[0] && data[index] === tags[1]) {
-                        let newSpan = addTags(tags,data)
-                        field.append(newSpan)
+                    if (tags[0]) {
+                        addTags(tags, data)
                     }
-                    
+
                     field.innerHTML += data[index]
                     field.scrollTop += 11;
                     index++
                 } else {
-                    clearInterval(intervalID)
+                    index = 0
+                    //clearInterval(intervalID)
                 }
             }, speed);
         }
 
         function addTags(tags, data) {
-                let newSpan = document.createElement("span");
-                while (data[index] !== tags[2]) {
+            let i = 1
+            let j = 2
+            let k = 1
+            const L = tags.length - 2;
+            while (i <= L) {
+                if (data[index] === tags[i]) {
+                    console.log('Data: ' + data[index])
+                    console.log('Tags i: ' + tags[i])
+                    console.log('Tags j: ' + tags[j])
+                    let newSpan = document.createElement("span");
+                    newSpan.classList.add('color'+k);
+                    while (data[index] !== tags[j]) {
+                        newSpan.innerHTML += data[index]
+                        
+                        index++
+                    }
                     newSpan.innerHTML += data[index]
                     index++
+                    field.append(newSpan)
                 }
-                newSpan.innerHTML += data[index]
-                index++
-                return newSpan
+                j = j + 2
+                i = i + 2
+                k++
+            }
         }
         setupTypeWriter(dataB, field);
-})
+    })

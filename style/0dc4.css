@@ -26,8 +26,20 @@ a {
   text-decoration: none
 }
 
-span {
+span.color1 {
   color: #fff
+}
+
+span.color2 {
+  color: #00f7ff
+}
+
+span.color3 {
+  color: rgb(255, 0, 0)
+}
+
+span.color4 {
+  color: rgb(225, 0, 255)
 }
 
 .main {
@@ -65,7 +77,7 @@ span {
 
 #background:after {
   content: "|";
-  animation: blink 1000ms linear infinite alternate;
+  animation: blink 500ms linear infinite alternate;
 }
 
 @-webkit-keyframes blink{
