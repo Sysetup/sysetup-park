@@ -1,1 +1,1 @@
-var Y = 'I love you JesusChrist (El Amor) Te amo! {Dios} Así somos <Divinos> "Me encantas" 777 [Todo lo somos]'
+var Y = 'I love you JesusChrist (El Amor) Te amo! {Dios} Así somos <Divinos> "Me encantas" 777 [Lo somos]'
