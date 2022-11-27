@@ -35,18 +35,23 @@ window.cliApi = {
 }
 
 
-fetch('http://localhost:5500/js/0dc5.js')
+fetch('http://localhost:5500/js/1.js')
     .then(response => response.text())
     .then(data => {
-        let dataB = data.replaceAll(';', ';\n\n')
         let field = document.getElementById('background')
-
-        function setupTypeWriter(dataB, field) {
+        let dataB = data.replaceAll(';', ';\n\n')
+        let index = 0
+        function setupTypeWriter(data, field) {
             let speed = 4
-            let index = 0
+            let tags = [true,'(',')','{','}']
             let intervalID = setInterval(() => {
-                if (dataB.length > index) {
-                    field.innerHTML += dataB[index]
+                if (data.length > index) {
+                    if (tags[0] && data[index] === tags[1]) {
+                        let newSpan = addTags(tags,data)
+                        field.append(newSpan)
+                    }
+                    
+                    field.innerHTML += data[index]
                     field.scrollTop += 11;
                     index++
                 } else {
@@ -55,96 +60,15 @@ fetch('http://localhost:5500/js/0dc5.js')
             }, speed);
         }
 
-        //let typewriter = document.getElementById('background');
-        setupTypeWriter(dataB,field);
-
-        /*         function setupTypewriter2(t) {
-                    var HTML = t.innerHTML;
-        
-                    t.innerHTML = "";
-                    console.log(HTML[0])
-                    var cursorPosition = 0,
-                        tag = "",
-                        writingTag = false,
-                        tagOpen = false,
-                        typeSpeed = 0,
-                        tempTypeSpeed = 0;
-        
-                    var type = function () {
-        
-                        if (writingTag === true) {
-                            tag += HTML[cursorPosition];
-                        }
-        
-                        /* if (HTML[cursorPosition] === "<") {
-                            tempTypeSpeed = 0;
-                            if (tagOpen) {
-                                tagOpen = false;
-                                writingTag = true;
-                            } else {
-                                tag = "";
-                                tagOpen = true;
-                                writingTag = true;
-                                tag += HTML[cursorPosition];
-                            }
-                        } *\/
-                        if (!writingTag && tagOpen) {
-                            tag.innerHTML += HTML[cursorPosition];
-                        }
-                        if (!writingTag && !tagOpen) {
-                            if (HTML[cursorPosition] === " ") {
-                                tempTypeSpeed = 0;
-                            }
-                            else {
-                                tempTypeSpeed = (Math.random() * typeSpeed) + 7;
-                            }
-                            t.innerHTML += HTML[cursorPosition];
-                        }
-                        if (writingTag === true && HTML[cursorPosition] === ">") {
-                            tempTypeSpeed = (Math.random() * typeSpeed) + 7;
-                            writingTag = false;
-                            if (tagOpen) {
-                                var newSpan = document.createElement("span");
-                                t.appendChild(newSpan);
-                                newSpan.innerHTML = tag;
-                                tag = newSpan.firstChild;
-                            }
-                        }
-        
-                        cursorPosition += 1;
-                        if (cursorPosition < HTML.length - 1) {
-                            setTimeout(type, tempTypeSpeed);
-        /*                     var bc = document.getElementById('backgroundContainer');
-                            var topPos = bc.offsetTop; *\/
-                            document.getElementById('background').scrollTop += 11;
-                            //console.log(topPos)
-                        }
-        
-                    };
-        
-                    return {
-                        type: type
-                    };
-                } */
-
-
-        //typewriter.type();
-    })
-
-
-/* let options2 = {
-    strings: ['x1'+ breaker, 'y1'],
-    typeSpeed: 18,
-    backSpeed: 18,
-    cursorChar: '',
-    shuffle: true,
-    smartBackspace: false,
-    loop: true
-};
-
-let typed2 = new Typed('#background', options2); */
-
-/* window.setInterval(function () {
-    0.8 <= (a.scrollTop() + a.height()) / b.height() && e();
-    a.scrollTop() + a.height() >= b.height() ? b.append(". ") : a.scrollTop(a.scrollTop() + 30)
-}, 40); */
+        function addTags(tags, data) {
+                let newSpan = document.createElement("span");
+                while (data[index] !== tags[2]) {
+                    newSpan.innerHTML += data[index]
+                    index++
+                }
+                newSpan.innerHTML += data[index]
+                index++
+                return newSpan
+        }
+        setupTypeWriter(dataB, field);
+})
