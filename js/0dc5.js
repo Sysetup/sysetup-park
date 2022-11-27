@@ -10,7 +10,7 @@ async function getUsers() {
     let data = await response.json()
     let connection = document.getElementById('connection').innerText
     var options = {
-        strings: ['Your IP Internet Protocol address: '+ data.ip, 'Your hostname: ' + data.hostname, connection, 'Your ISP City: '+ data.city, 'Your Country: ' + data.country, 'Your ISP Region: '+ data.region, 'Your Cardinal points: '+ data.loc, 'Your ISP Postal code: '+ data.postal, 'Your Time zone: '+ data.timezone, 'Your ASN Code: ' + data.asn.asn, 'Your ASN Name: '+ data.asn.name, 'Your ASN Domain: ' + data.asn.domain, 'Your ASN Route: ' + data.asn.route, 'Your ASN Type: ' + data.asn.type, 'Your ISP Company: ' + data.company.name, 'Your Carrier: ' + data.carrier.name],
+        strings: ['Your IP Internet Protocol address: ' + data.ip, 'Your hostname: ' + data.hostname, connection, 'Your ISP City: ' + data.city, 'Your Country code: ' + data.country, 'Your ISP Region: ' + data.region, 'Your Cardinal points: ' + data.loc, 'Your ISP Postal code: ' + data.postal, 'Your Time zone: ' + data.timezone, 'Your ASN Code: ' + data.asn.asn, 'Your ASN Name: ' + data.asn.name, 'Your ASN Domain: ' + data.asn.domain, 'Your ASN Route: ' + data.asn.route, 'Your ASN Type: ' + data.asn.type, 'Your ISP Company: ' + data.company.name, 'Your Carrier: ' + data.carrier.name],
         typeSpeed: 18,
         backSpeed: 18,
         cursorChar: '',
@@ -22,3 +22,116 @@ async function getUsers() {
     var typed = new Typed('#client', options);
     console.table(data)
 }
+
+let a;
+
+window.cliApi = {
+    setValue: function (value) {
+        a = value;
+    },
+    getValue: function () {
+        return a;
+    }
+}
+
+
+fetch('http://localhost:5500/js/0dc5.js')
+    .then(response => response.text())
+    .then(data => {
+        let breaker = data.replaceAll(';', ';\n\n')
+        document.getElementById('background').innerHTML = breaker
+
+
+        function setupTypewriter(t) {
+            var HTML = t.innerHTML;
+
+            t.innerHTML = "";
+
+            var cursorPosition = 0,
+                tag = "",
+                writingTag = false,
+                tagOpen = false,
+                typeSpeed = 0,
+                tempTypeSpeed = 0;
+
+            var type = function () {
+
+                if (writingTag === true) {
+                    tag += HTML[cursorPosition];
+                }
+
+                /* if (HTML[cursorPosition] === "<") {
+                    tempTypeSpeed = 0;
+                    if (tagOpen) {
+                        tagOpen = false;
+                        writingTag = true;
+                    } else {
+                        tag = "";
+                        tagOpen = true;
+                        writingTag = true;
+                        tag += HTML[cursorPosition];
+                    }
+                } */
+                if (!writingTag && tagOpen) {
+                    tag.innerHTML += HTML[cursorPosition];
+                }
+                if (!writingTag && !tagOpen) {
+                    if (HTML[cursorPosition] === " ") {
+                        tempTypeSpeed = 0;
+                    }
+                    else {
+                        tempTypeSpeed = (Math.random() * typeSpeed) + 7;
+                    }
+                    t.innerHTML += HTML[cursorPosition];
+                }
+                if (writingTag === true && HTML[cursorPosition] === ">") {
+                    tempTypeSpeed = (Math.random() * typeSpeed) + 7;
+                    writingTag = false;
+                    if (tagOpen) {
+                        var newSpan = document.createElement("span");
+                        t.appendChild(newSpan);
+                        newSpan.innerHTML = tag;
+                        tag = newSpan.firstChild;
+                    }
+                }
+
+                cursorPosition += 1;
+                if (cursorPosition < HTML.length - 1) {
+                    setTimeout(type, tempTypeSpeed);
+/*                     var bc = document.getElementById('backgroundContainer');
+                    var topPos = bc.offsetTop; */
+                    document.getElementById('background').scrollTop += 11;
+                    //console.log(topPos)
+                }
+
+            };
+
+            return {
+                type: type
+            };
+        }
+
+        var typewriter = document.getElementById('background');
+
+        typewriter = setupTypewriter(typewriter);
+
+        typewriter.type();
+    })
+
+
+/* let options2 = {
+    strings: ['x1'+ breaker, 'y1'],
+    typeSpeed: 18,
+    backSpeed: 18,
+    cursorChar: '',
+    shuffle: true,
+    smartBackspace: false,
+    loop: true
+};
+
+let typed2 = new Typed('#background', options2); */
+
+/* window.setInterval(function () {
+    0.8 <= (a.scrollTop() + a.height()) / b.height() && e();
+    a.scrollTop() + a.height() >= b.height() ? b.append(". ") : a.scrollTop(a.scrollTop() + 30)
+}, 40); */
