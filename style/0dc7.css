@@ -65,11 +65,9 @@ span.color4 {
   left: 0;
   z-index: -100;
   white-space: pre-wrap;
-  opacity: .30;
+  opacity: .29;
   height: 100%;
-  width: 47%;
-  margin: 0;
-  padding-left: 29px;
+  padding: 0 29px;
   overflow: hidden;
   text-align: left;
   font-size: 0.7vw;

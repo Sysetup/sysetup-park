@@ -309,7 +309,7 @@ async function getUsers() {
 let urls = []
 let indexUrls = 0
 let indexClass = 0
-var field = document.getElementById('background')
+const field = document.getElementById('background')
 
 fetch('https://api.github.com/users/sysetup/repos')
     .then(response => response.json())
@@ -359,7 +359,6 @@ function contents(data, name) {
 function js(data) {
     data.forEach(element => {
         urls[indexUrls] = element.download_url
-        //console.log(`URLs: ${urls[indexUrls]}`)
         indexUrls++
     })
     shuffleArray(urls)
@@ -376,7 +375,6 @@ function getJSON(urls) {
         fetch(element)
             .then(response => response.text())
             .then(data => {
-                //console.log('Data: '+ data)
                 settingDOM(data, urls)
             })
             .catch((error) => {
@@ -386,21 +384,11 @@ function getJSON(urls) {
 }
 
 function settingDOM(data, urls) {
-    let html = hljs.highlightAuto(data).value
+    const html = hljs.highlightAuto(data).value
     const div = document.createElement("div")
     const id = document.createAttribute("id")
 
     indexClass++
-
-    //data = data.replaceAll(';', ';\n\n')
-    /* const obj = new Letterize({
-        targets: field,
-        wrapper: "i",
-        className: "letter"
-    });
- */
-    //field.appendChild(obj.listAll[1])
-
     id.value = indexClass
     div.setAttributeNode(id)
     div.innerHTML = html
@@ -421,9 +409,7 @@ function scrolling(height) {
                 top: +18,
                 behavior: "smooth"
             });
-            //console.log(`If. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
         } else {
-            //index = 0
             //clearInterval(intervalID)
             field.scrollTop = 0
             //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
