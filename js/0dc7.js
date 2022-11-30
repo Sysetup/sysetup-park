@@ -362,7 +362,6 @@ function js(data) {
         indexUrls++
     })
     shuffleArray(urls)
-    console.log(urls)
     getJSON(urls)
 }
 
