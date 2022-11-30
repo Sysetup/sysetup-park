@@ -12,51 +12,122 @@ async function getUsers() {
     console.table(data)
 }
 
-fetch('https://sysetup.com/js/0dc7.js')
-    .then(response => response.text())
-    .then(data => {
-        let index = 0
-        let field = document.getElementById('background')
-        function setupTypeWriter(data) {
-            let speed = 1
-            let tags = [true, '(', ')', '{', '}', '<', '>', '[', ']']
-            data = data.replaceAll(';', ';\n\n')
-            setInterval(() => {
-                if (data.length > index) {
-                    if (tags[0]) {
-                        addTags(tags, data)
-                    }
-                    field.innerHTML += data[index]
-                    field.scrollTop += 11;
-                    index++
-                } else {
-                    index = 0
-                    //clearInterval(intervalID)
-                }
-            }, speed)
-        }
+let urls = []
+let indexUrls = 0
+let indexClass = 0
+var field = document.getElementById('background')
 
-        function addTags(tags, data) {
-            let i = 1
-            let j = 2
-            let k = 1
-            const L = tags.length - 2
-            while (i <= L) {
-                if (data[index] === tags[i]) {
-                    let newSpan = document.createElement("span")
-                    newSpan.classList.add('color' + k)
-                    while (data[index] !== tags[j]) {
-                        newSpan.innerHTML += data[index]
-                        index++
-                    }
-                    newSpan.innerHTML += data[index]
-                    index++
-                    field.append(newSpan)
-                }
-                j = j + 2
-                i = i + 2
-                k++
+fetch('https://api.github.com/users/sysetup/repos')
+    .then(response => response.json())
+    .then(data => {
+        repos(data)
+    })
+    .catch((error) => {
+        console.error('There has been a problem with your fetch operation:', error)
+    })
+
+function repos(data) {
+    data.forEach(element => {
+        fetch('https://api.github.com/repos/Sysetup/' + element.name + '/contents')
+            .then(response => response.json())
+            .then(data => {
+                contents(data, element.name)
+            })
+            .catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error);
+            })
+    })
+}
+
+function contents(data, name) {
+    data.forEach(element => {
+        let str = element.download_url
+        if (element.type === 'file' && (str.slice(-2) === 'js' || str.slice(-2) === 'md' || str.slice(-2) === 'sh' || str.slice(-2) === 'ml')) {
+            urls[indexUrls] = element.download_url
+            console.log(`URLs: ${urls[indexUrls]}`)
+            indexUrls++
+        } else {
+            if (element.path === 'js') {
+                fetch('https://api.github.com/repos/Sysetup/' + name + '/contents/js')
+                    .then(response => response.json())
+                    .then(data => {
+                        js(data)
+                    })
+                    .catch((error) => {
+                        console.error('There has been a problem with your fetch operation:', error)
+                    })
             }
         }
-        setupTypeWriter(data)
     })
+}
+
+function js(data) {
+    data.forEach(element => {
+        urls[indexUrls] = element.download_url
+        console.log(`URLs: ${urls[indexUrls]}`)
+        indexUrls++
+    })
+    getJSON(urls)
+}
+
+function getJSON(urls) {
+    urls.forEach(element => {
+        fetch(element)
+            .then(response => response.text())
+            .then(data => {
+                //console.log('Data: '+ data)
+                settingDOM(data, urls)
+            })
+            .catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error)
+            })
+    })
+}
+
+function settingDOM(data, urls) {
+    let html = hljs.highlightAuto(data).value
+    const div = document.createElement("div")
+    const id = document.createAttribute("id")
+
+    indexClass++
+    console.log(`indexClass: ${indexClass}. URLs.lenght: ${urls.length}`)
+
+    //data = data.replaceAll(';', ';\n\n')
+    /* const obj = new Letterize({
+        targets: field,
+        wrapper: "i",
+        className: "letter"
+    }); */
+    //field.appendChild(obj.listAll[1])
+
+    id.value = indexClass
+    div.setAttributeNode(id)
+    div.innerHTML = html
+    field.appendChild(div)
+    if (indexClass >= urls.length) {
+        scrolling(field.scrollHeight)
+        console.log(`field.scrollHeight 1: ${field.scrollHeight}`)
+    }
+
+}
+
+function scrolling(height) {
+    let speed = 199
+    let h = height - 843
+    //let intervalID
+    //intervalID = 
+    setInterval(() => {
+        if (h >= field.scrollTop) {
+            field.scrollBy({
+                top: +18,
+                behavior: "smooth"
+            });
+            console.log(`If. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
+        } else {
+            //index = 0
+            //clearInterval(intervalID)
+            field.scrollTop = 0
+            console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
+        }
+    }, speed)
+}
