@@ -311,7 +311,12 @@ let indexUrls = 0
 let indexClass = 0
 const field = document.getElementById('background')
 
-fetch('https://api.github.com/users/sysetup/repos')
+fetch('https://api.github.com/users/sysetup/repos', {
+    method: "GET",
+    headers: {
+        Authorization: `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`
+    }
+})
     .then(response => response.json())
     .then(data => {
         repos(data)
@@ -383,7 +388,7 @@ function getJSON(urls) {
 }
 
 function settingDOM(data, urls) {
-    const html = hljs.highlightAuto(data).value
+    let html = hljs.highlightAuto(data).value
     const div = document.createElement("div")
     const id = document.createAttribute("id")
 
@@ -391,6 +396,7 @@ function settingDOM(data, urls) {
     id.value = indexClass
     div.setAttributeNode(id)
     div.innerHTML = html
+    html = ""
     field.appendChild(div)
     if (indexClass >= urls.length) {
         scrolling(field.scrollHeight)
@@ -408,6 +414,7 @@ function scrolling(height) {
                 top: +18,
                 behavior: "smooth"
             });
+            //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
         } else {
             //clearInterval(intervalID)
             field.scrollTop = 0
