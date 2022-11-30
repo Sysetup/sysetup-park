@@ -67,6 +67,7 @@ span.color4 {
   white-space: pre-wrap;
   opacity: .29;
   height: 100%;
+  width: -webkit-fill-available;
   padding: 0 29px;
   overflow: hidden;
   text-align: left;
