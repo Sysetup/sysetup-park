@@ -293,17 +293,66 @@
     })()
 })();
 
+getUsers()
 
-//getUsers()
+let i = 0
+let j = 0
+let boolean = [true, false]
+let interval01
 
 async function getUsers() {
     let response = await fetch('https://ipinfo.io/json?token=1e73a3e854d250')
     let data = await response.json()
-    let connection = document.getElementById('connection').innerText
-    let dataJson = {
-        strings: ['Your IP Internet Protocol address: ' + data.ip, 'Your hostname: ' + data.hostname, connection, 'Your ISP City: ' + data.city, 'Your Country code: ' + data.country, 'Your ISP Region: ' + data.region, 'Your Cardinal points: ' + data.loc, 'Your ISP Postal code: ' + data.postal, 'Your Time zone: ' + data.timezone, 'Your ASN Code: ' + data.asn.asn, 'Your ASN Name: ' + data.asn.name, 'Your ASN Domain: ' + data.asn.domain, 'Your ASN Route: ' + data.asn.route, 'Your ASN Type: ' + data.asn.type, 'Your ISP Company: ' + data.company.name, 'Your Carrier: ' + data.carrier.name]
+    let connections = document.getElementById('connections')
+    let messages = ['Your IP Internet Protocol address: ' + data.ip, 'Your hostname: ' + data.hostname, 'Your ISP City: ' + data.city, 'Your Country code: ' + data.country, 'Your ISP Region: ' + data.region, 'Your Cardinal points: ' + data.loc, 'Your ISP Postal code: ' + data.postal, 'Your Time zone: ' + data.timezone, 'Your ASN Code: ' + data.asn.asn, 'Your ASN Name: ' + data.asn.name, 'Your ASN Domain: ' + data.asn.domain, 'Your ASN Route: ' + data.asn.route, 'Your ASN Type: ' + data.asn.type, 'Your ISP Company: ' + data.company.name, 'Your Carrier: ' + data.carrier.name]
+
+    interval01 = setInterval(typer, 76, messages)
+}
+
+function typer(messages) {
+    if (messages[i].length > j) {
+        connections.innerHTML += messages[i][j]
+        /* shuffleArray(boolean)
+
+        console.log(`Boolean: ${boolean[0]} Length: ${messages[i].length}`)
+
+        if (boolean[0] && (j <= messages[i].length)) {
+            j++
+            connections.innerHTML += " "
+        } else if (j >= 0) {
+            j--
+        } */
+        j++
+        console.log(`J: ${j}`)
+    } else {
+        i++
+        j = 0
+        k = 0
+
+        clearInterval(interval01)
+        console.log(`Else. I: ${i}. J: ${j}. K: ${k}`)
+
+        let interval02 = setInterval(() => {
+            k++
+            if (k === 3) {
+                k = 0
+                clearInterval(interval02)
+                interval01 = setInterval(typer, 123, messages)
+                console.log('Reanude!')
+                connections.innerHTML = " "
+            }
+        }, 1000)
     }
-    console.table(data)
+
+    console.log(`Messages 01: ${messages.length} I: ${i}`)
+
+    if (messages.length === i) {
+        i = 0
+        console.log(`Messages 02: ${messages.length}`)
+        clearInterval(interval01)
+        interval01 = null;
+        shuffleArray(messages)
+    }
 }
 
 let urls = []
@@ -413,7 +462,7 @@ function scrolling(height) {
             field.scrollBy({
                 top: +18,
                 behavior: "smooth"
-            });
+            })
             //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
         } else {
             //clearInterval(intervalID)

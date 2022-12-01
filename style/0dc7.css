@@ -80,6 +80,10 @@ span.color4 {
   animation: blink 500ms linear infinite alternate;
 }
 
+#connections{
+  width: 100%;
+}
+
 @-webkit-keyframes blink{
 	0%{opacity: 0;}
 	100%{opacity: 1;}
