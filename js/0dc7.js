@@ -309,7 +309,7 @@ const connections = document.getElementById('connections')
 async function getUsers() {
     let response = await fetch('https://ipinfo.io/json?token=1e73a3e854d250')
     let data = await response.json()
-    let messages = ['Your IP Internet Protocol address: ' + data.ip, 'Your hostname: ' + data.hostname, 'Your ISP City: ' + data.city, 'Your Country code: ' + data.country, 'Your ISP Region: ' + data.region, 'Your Cardinal points: ' + data.loc, 'Your ISP Postal code: ' + data.postal, 'Your Time zone: ' + data.timezone, 'Your ASN Code: ' + data.asn.asn, 'Your ASN Name: ' + data.asn.name, 'Your ASN Domain: ' + data.asn.domain, 'Your ASN Route: ' + data.asn.route, 'Your ASN Type: ' + data.asn.type, 'Your ISP Company: ' + data.company.name, 'Your Carrier: ' + data.carrier.name]
+    let messages = ['IP Address: ' + data.ip, 'Hostname: ' + data.hostname, 'ISP City: ' + data.city, 'Country code: ' + data.country, 'ISP Region: ' + data.region, 'Cardinal points: ' + data.loc, 'ISP Postal code: ' + data.postal, 'Time zone: ' + data.timezone, 'ASN Code: ' + data.asn.asn, 'ASN Name: ' + data.asn.name, 'ASN Domain: ' + data.asn.domain, 'ASN Route: ' + data.asn.route, 'ASN Type: ' + data.asn.type, 'ISP Company: ' + data.company.name, 'Carrier: ' + data.carrier.name]
     console.table(messages)
     interval01 = setInterval(typer, 123, messages)
 }
