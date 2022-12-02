@@ -297,68 +297,52 @@ getUsers()
 
 let i = 0
 let j = 0
-let boolean = [true, false]
+let c = 0
+//let boolean = [true, false]
 let interval01
+let urls = []
+let indexUrls = 0
+let indexClass = 0
+const field = document.getElementById('background')
+const connections = document.getElementById('connections')
 
 async function getUsers() {
     let response = await fetch('https://ipinfo.io/json?token=1e73a3e854d250')
     let data = await response.json()
-    let connections = document.getElementById('connections')
     let messages = ['Your IP Internet Protocol address: ' + data.ip, 'Your hostname: ' + data.hostname, 'Your ISP City: ' + data.city, 'Your Country code: ' + data.country, 'Your ISP Region: ' + data.region, 'Your Cardinal points: ' + data.loc, 'Your ISP Postal code: ' + data.postal, 'Your Time zone: ' + data.timezone, 'Your ASN Code: ' + data.asn.asn, 'Your ASN Name: ' + data.asn.name, 'Your ASN Domain: ' + data.asn.domain, 'Your ASN Route: ' + data.asn.route, 'Your ASN Type: ' + data.asn.type, 'Your ISP Company: ' + data.company.name, 'Your Carrier: ' + data.carrier.name]
-
-    interval01 = setInterval(typer, 76, messages)
+    console.table(messages)
+    interval01 = setInterval(typer, 123, messages)
 }
 
 function typer(messages) {
     if (messages[i].length > j) {
         connections.innerHTML += messages[i][j]
-        /* shuffleArray(boolean)
-
-        console.log(`Boolean: ${boolean[0]} Length: ${messages[i].length}`)
-
-        if (boolean[0] && (j <= messages[i].length)) {
-            j++
-            connections.innerHTML += " "
-        } else if (j >= 0) {
-            j--
-        } */
         j++
-        console.log(`J: ${j}`)
     } else {
         i++
         j = 0
         k = 0
 
         clearInterval(interval01)
-        console.log(`Else. I: ${i}. J: ${j}. K: ${k}`)
 
         let interval02 = setInterval(() => {
             k++
             if (k === 3) {
                 k = 0
                 clearInterval(interval02)
-                interval01 = setInterval(typer, 123, messages)
-                console.log('Reanude!')
                 connections.innerHTML = " "
+                interval01 = setInterval(typer, 123, messages)
             }
-        }, 1000)
+        }, 521)
     }
-
-    console.log(`Messages 01: ${messages.length} I: ${i}`)
 
     if (messages.length === i) {
         i = 0
-        console.log(`Messages 02: ${messages.length}`)
         clearInterval(interval01)
         interval01 = null;
         shuffleArray(messages)
     }
 }
-
-let urls = []
-let indexUrls = 0
-let indexClass = 0
-const field = document.getElementById('background')
 
 fetch('https://api.github.com/users/sysetup/repos', {
     method: "GET",
@@ -383,7 +367,6 @@ function repos(data) {
             })
             .catch((error) => {
                 console.error('There has been a problem with your fetch operation:', error);
-
             })
     })
 }
@@ -393,7 +376,6 @@ function contents(data, name) {
         let str = element.download_url
         if (element.type === 'file' && (str.slice(-2) === 'js' || str.slice(-2) === 'md' || str.slice(-2) === 'sh' || str.slice(-2) === 'ml')) {
             urls[indexUrls] = element.download_url
-            //console.log(`URLs: ${urls[indexUrls]}`)
             indexUrls++
         } else {
             if (element.path === 'js') {
@@ -465,7 +447,6 @@ function scrolling(height) {
             })
             //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
         } else {
-            //clearInterval(intervalID)
             field.scrollTop = 0
             //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
         }

@@ -50,7 +50,7 @@ span.color4 {
   will-change: opacity
 }
 
-#backgroundContainer{
+#backgroundContainer {
   position: absolute;
   top: 0;
   left: 0;
@@ -80,23 +80,39 @@ span.color4 {
   animation: blink 500ms linear infinite alternate;
 }
 
-#connections{
+#connections {
+  color: #fff;
   width: 100%;
 }
 
-@-webkit-keyframes blink{
-	0%{opacity: 0;}
-	100%{opacity: 1;}
+@-webkit-keyframes blink {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
-@-moz-keyframes blink{
-	0%{opacity: 0;}
-	100%{opacity: 1;}
+@-moz-keyframes blink {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
-@keyframes blink{
-	0%{opacity: 0;}
-	100%{opacity: 1;}
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .logo {
