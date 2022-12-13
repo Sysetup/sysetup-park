@@ -80,6 +80,10 @@ span.color4 {
   animation: blink 500ms linear infinite alternate;
 }
 
+#space{
+  height: 100%;
+}
+
 #connections {
   color: #fff;
   width: 100%;

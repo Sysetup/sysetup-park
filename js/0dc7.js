@@ -300,7 +300,7 @@ let c = 0
 let interval01
 let urls = []
 let indexUrls = 0
-let indexClass = 0
+let indexId = 0
 const field = document.getElementById('background')
 const connections = document.getElementById('connections')
 
@@ -318,6 +318,7 @@ function geo(data) {
     let firstLanguage = Object.keys(data.country.languages)[0]
     let messages = ['IP Address: ' + data.ip, 'IP Type: ' + data.type, 'ISP location latitude: ' + data.location.latitude, 'ISP location longitude: ' + data.location.longitude, 'ISP Postal code: ' + data.postcode, 'ISP area code: ' + data.area.code, 'ISP area geoname id: ' + data.area.geonameid, 'ISP Area: ' + data.area.name, 'ASN number: ' + data.asn.number, 'ASN organization: ' + data.asn.organisation, 'City geoname id: ' + data.city.geonameid, 'City name: ' + data.city.name, 'City population: ' + data.city.population, 'Continent geoname id: ' + data.continent.geonameid, 'Continent name: ' + data.continent.name, 'Data continent code: ' + data.continent.code, 'Country geonameid: ' + data.country.geonameid, 'Country name: ' + data.country.name, 'Country code: ' + data.country.code, 'Country capital: ' + data.country.capital, 'Country area size: ' + data.country.area_size, 'Country population: ' + data.country.population, 'Country phone code: ' + data.country.phone_code, 'Country languajes: ' + data.country.languages[firstLanguage], 'Country flag: ' + data.country.flag.emoji, 'Country tld: ' + data.country.tld, 'Currency code: ' + data.currency.code, 'Currency name: ' + data.currency.name, 'Use tor: ' + data.security.is_tor, 'Use proxy: ' + data.security.is_proxy, 'Use a crawler: ' + data.security.is_crawler, 'Time zone: ' + data.time.timezone, 'Time gtm_offset: ' + data.time.gtm_offset, 'Time gmt_offset: ' + data.time.gmt_offset, 'Data time code: ' + data.time.code]
     console.table(messages)
+    shuffleArray(messages)
     interval01 = setInterval(typer, 123, messages)
 }
 
@@ -408,10 +409,6 @@ function js(data) {
     getJSON(urls)
 }
 
-function shuffleArray(arr) {
-    arr.sort(() => Math.random() - 0.5);
-}
-
 function getJSON(urls) {
     urls.forEach(element => {
         fetch(element)
@@ -428,28 +425,35 @@ function getJSON(urls) {
 function settingDOM(data, urls) {
     let html = hljs.highlightAuto(data).value
     const div = document.createElement("div")
+    const divSpace = document.createElement("div")
     const id = document.createAttribute("id")
+    const idSpace = document.createAttribute("id")
 
-    indexClass++
-    id.value = indexClass
+    indexId++
+    id.value = indexId
     div.setAttributeNode(id)
+    idSpace.value = 'space'
+    divSpace.setAttributeNode(idSpace)
+    divSpace.offsetHeight = window.innerHeight + "px" || window.screen.height + "px"
     div.innerHTML = html
     html = ""
+    field.appendChild(divSpace)
     field.appendChild(div)
-    if (indexClass >= urls.length) {
+    
+    if (indexId >= urls.length) {
         scrolling(field.scrollHeight)
     }
 }
 
 function scrolling(height) {
-    let speed = 199
+    let speed = 76
     let h = height - 843
     //let intervalID
     //intervalID = 
     setInterval(() => {
         if (h >= field.scrollTop) {
             field.scrollBy({
-                top: +18,
+                top: +11,
                 behavior: "smooth"
             })
             //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
@@ -458,4 +462,8 @@ function scrolling(height) {
             //console.log(`Else. MaxY: ${h} ScrollTop: ${field.scrollTop} `)
         }
     }, speed)
+}
+
+function shuffleArray(arr) {
+    arr.sort(() => Math.random() - 0.5);
 }
