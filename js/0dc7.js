@@ -296,7 +296,6 @@
 let i = 0
 let j = 0
 let c = 0
-//let boolean = [true, false]
 let interval01
 let urls = []
 let indexUrls = 0
@@ -405,6 +404,30 @@ function js(data) {
         urls[indexUrls] = element.download_url
         indexUrls++
     })
+    gits(urls)
+}
+
+function gits(urls) {
+    fetch('https://api.github.com/users/sysetup/gists')
+        .then(response => response.json())
+        .then(data => {
+            getGitsUrl(data, urls)
+        })
+        .catch((error) => {
+            console.error('There has been a problem with your fetch operation:', error);
+        })
+}
+
+function getGitsUrl(data, urls) {
+    let file
+    data.forEach(element => {
+        for (let i = 0; i < Object.keys(element.files).length; i++) {
+            file = Object.keys(element.files)[i]
+            urls[indexUrls] = element.files[file].raw_url
+            indexUrls++
+        }
+    })
+
     shuffleArray(urls)
     getJSON(urls)
 }
@@ -441,7 +464,6 @@ function settingDOM(data, urls) {
     field.appendChild(div)
     
     if (indexId >= urls.length) {
-        console.log(';)')
         field.appendChild(divSpace)
         scrolling(field.scrollHeight)
     }
