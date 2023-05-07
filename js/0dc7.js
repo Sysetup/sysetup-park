@@ -462,7 +462,7 @@ function settingDOM(data, urls) {
     html = ""
     field.appendChild(divSpace)
     field.appendChild(div)
-    
+
     if (indexId >= urls.length) {
         field.appendChild(divSpace)
         scrolling(field.scrollHeight)
@@ -490,4 +490,32 @@ function scrolling(height) {
 
 function shuffleArray(arr) {
     arr.sort(() => Math.random() - 0.5);
+}
+
+// Arreglo con cadenas de texto
+var textoArray = [
+    "Innovative solutions for system creation and optimization.",
+    "Empowering businesses through cutting-edge system creation and optimization.",
+    "Building tomorrow's success with optimized systems and creative solutions.",
+    "Elevating performance through strategic system creation and optimization.",
+    "Unlocking potential with optimized systems and innovative creation strategies.",
+    "Driving excellence through customized system creation and optimization.", ,
+    "Transforming possibilities into realities with advanced system creation and optimization.",
+    "Creation and optimization systems."
+];
+
+// Función para mostrar elemento aleatorio del arreglo
+showMessage()
+
+function showMessage() {
+    // Obtener un número aleatorio entre 0 y el tamaño del arreglo - 1
+    let indice = Math.floor(Math.random() * textoArray.length);
+
+    // Obtener el elemento del arreglo con el índice aleatorio
+    let randomText = textoArray[indice];
+
+    // Mostrar el texto aleatorio en el div con el ID "randomText"
+    if(randomText){
+        document.getElementById("description").innerHTML = randomText;
+    }
 }
