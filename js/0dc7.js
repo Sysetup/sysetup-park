@@ -499,7 +499,7 @@ var textoArray = [
     "Building tomorrow's success with optimized systems and creative solutions.",
     "Elevating performance through strategic system creation and optimization.",
     "Unlocking potential with optimized systems and innovative creation strategies.",
-    "Driving excellence through customized system creation and optimization.", ,
+    "Driving excellence through customized system creation and optimization.",
     "Transforming possibilities into realities with advanced system creation and optimization.",
     "Creation and optimization systems.",
     "SYSETUP is a veteran in the IT industry, delivering full-cycle services in systems development for more than 18 years.",
