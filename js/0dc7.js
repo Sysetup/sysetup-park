@@ -501,7 +501,14 @@ var textoArray = [
     "Unlocking potential with optimized systems and innovative creation strategies.",
     "Driving excellence through customized system creation and optimization.", ,
     "Transforming possibilities into realities with advanced system creation and optimization.",
-    "Creation and optimization systems."
+    "Creation and optimization systems.",
+    "SYSETUP is a veteran in the IT industry, delivering full-cycle services in systems development for more than 18 years.",
+    "For over 18 years, SYSETUP has been offering global IT solutions, specializing in full-cycle systems development services.",
+    "With 18+ years of industry expertise, SYSETUP provides comprehensive IT solutions, specializing in systems development.",
+    "SYSETUP is a prominent global IT solutions provider, specializing in systems development and full-cycle services with over 18 years of experience.",
+    "For more than 18 years, SYSETUP has been delivering end-to-end IT solutions with a focus on systems development, establishing itself as a leading global provider.",
+    "As a global IT solutions provider with over 18 years of experience, SYSETUP specializes in full-cycle services, including systems development, to meet the ever-evolving demands of the industry.",
+    "SYSETUP's 18+ years of experience in the IT industry has allowed them to specialize in full-cycle services, particularly in systems development, making them a prominent global provider."
 ];
 
 // Función para mostrar elemento aleatorio del arreglo
@@ -515,7 +522,7 @@ function showMessage() {
     let randomText = textoArray[indice];
 
     // Mostrar el texto aleatorio en el div con el ID "randomText"
-    if(randomText){
+    if (randomText) {
         document.getElementById("description").innerHTML = randomText;
     }
 }
