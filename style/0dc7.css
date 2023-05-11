@@ -126,7 +126,7 @@ span.color4 {
 }
 
 #description {
-  font-size: 2.3vw
+  font-size: 1.3vw;
 }
 
 .languages {
@@ -164,11 +164,7 @@ span.color4 {
   left: 0
 }
 
-.email {
-  font-size: 1.3vw;
-}
-
-.telephone {
+.telephone, .email {
   font-size: 1.3vw
 }
 
