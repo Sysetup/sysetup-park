@@ -17,7 +17,7 @@ body {
   vertical-align: middle;
   margin: 2em auto;
   font-family: spaceage;
-  font-size: 1vw;
+  font-size: clamp(1rem, 1.3vw, 2.2rem);
   color: #11ece5
 }
 
@@ -72,7 +72,7 @@ span.color4 {
   padding: 0 18px;
   overflow: hidden;
   text-align: left;
-  font-size: 0.7vw;
+  font-size: clamp(1rem, 1.3vw, 1rem);
 }
 
 #background:after {
@@ -87,6 +87,7 @@ span.color4 {
 #connections {
   color: #fff;
   width: 100%;
+  min-height: 3rem;
 }
 
 @-webkit-keyframes blink {
@@ -120,28 +121,29 @@ span.color4 {
 }
 
 .logo {
-  font-size: 11.3vw;
+  font-size: clamp(3rem, 11vw, 18rem);
   color: #0f1724;
-  -webkit-text-stroke: 0.1vw #fff
+  -webkit-text-stroke: 0.18rem #fff;
 }
 
 #description {
-  font-size: 1.3vw;
+  font-size: clamp(1rem, 1.3vw, 2.2rem);
+  padding: 1rem 3rem;
 }
 
 .languages {
-  font-size: 1.4vw;
+  font-size: clamp(1rem, 1.3vw, 2.2rem);
 }
 
 .languages-jp {
-  font-size: 0.7vw;
+  font-size: clamp(1rem, 1.3vw, 2.2rem);
 }
 
 #bottom {
   width: 100%;
   position: absolute;
   bottom: 14px;
-  font-size: 1vw;
+  font-size: clamp(1rem, 1vw, 2rem);
 }
 
 #particles-js canvas {
@@ -165,7 +167,7 @@ span.color4 {
 }
 
 .telephone, .email {
-  font-size: 1.3vw
+  font-size: clamp(1rem, 1.3vw, 2.2rem);
 }
 
 /* Fallback styling, taken from Normalize: https://github.com/necolas/normalize.css */
@@ -249,5 +251,26 @@ span.color4 {
 
   46% {
     opacity: 1
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 1.1rem;
+  }
+  .logo {
+    font-size: 3rem;
+    -webkit-text-stroke: 0.07rem #fff;
+  }
+  #description,
+  .telephone,
+  .email,
+  #bottom,
+  .languages,
+  .languages-jp {
+    font-size: 1rem;
+  }
+  #background {
+    font-size: 0.9rem;
   }
 }
