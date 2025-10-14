@@ -1,5 +1,5 @@
 @font-face {
-  font-family: spaceage;
+  font-family: doto;
   src: url(../fonts/Doto-Regular.ttf);
   font-display: block
 }
@@ -16,7 +16,7 @@ body {
   display: table-cell;
   vertical-align: middle;
   margin: 2em auto;
-  font-family: spaceage;
+  font-family: doto;
   font-size: clamp(1rem, 1.3vw, 2.2rem);
   color: #11ece5
 }
