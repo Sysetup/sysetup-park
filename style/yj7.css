@@ -121,14 +121,17 @@ span.color4 {
 }
 
 .logo {
-  color: #ffffff;
-  font-size: 1.4rem;
-  line-height: 1.2;
+  display: inline-block;
+  margin: 0 auto 1.5rem;
+  padding: 0 1rem;
+  font-family: doto, "Fira Code", "SFMono-Regular", "Courier New", monospace;
+  font-weight: 600;
+  line-height: 1;
   letter-spacing: 0;
+  white-space: pre;
+  color: #fff;
   text-align: center;
-  margin: 0;
-  font-weight: bold;
-  /* text-shadow: 0 0 10px rgb(234, 242, 245); */
+  font-size: clamp(0.3rem, calc(100vw / 68), 1.95rem);
 }
 
 #description {
@@ -259,7 +262,7 @@ span.color4 {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 575.98px) {
   html {
     display: block;
     height: auto;
@@ -279,10 +282,10 @@ span.color4 {
     width: 100%;
   }
   .logo {
-    font-size: clamp(0.24rem, calc(100vw / 68), 3rem);
-    -webkit-text-stroke: clamp(0.02rem, calc(100vw / 680), 0.07rem) #fff;
-    line-height: 1.08;
-    margin: 0 auto 1.5rem;
+    padding: 0 0.75rem;
+    font-size: clamp(0.28rem, calc(100vw / 68), 1.35rem);
+    line-height: 0.8;
+    margin: 0 auto 1.25rem;
   }
   #description,
   .telephone,
@@ -317,8 +320,7 @@ span.color4 {
 
 @media (max-width: 360px) {
   .logo {
-    font-size: clamp(0.22rem, calc(100vw / 72), 2.5rem);
-    -webkit-text-stroke: clamp(0.018rem, calc(100vw / 720), 0.05rem) #fff;
+    font-size: clamp(0.25rem, calc(100vw / 72), 1.1rem);
   }
   #description,
   .telephone,
