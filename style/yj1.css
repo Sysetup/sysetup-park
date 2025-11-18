@@ -17,7 +17,6 @@ body {
   vertical-align: middle;
   margin: 2em auto;
   font-family: doto;
-  font-size: clamp(1rem, 1.3vw, 2.2rem);
   color: #11ece5
 }
 
@@ -131,11 +130,11 @@ span.color4 {
   white-space: pre;
   color: #fff;
   text-align: center;
-  font-size: clamp(0.3rem, calc(100vw / 68), 1.95rem);
+  font-size: clamp(2.5rem, 11vw, 7rem);
 }
 
 #description {
-  font-size: clamp(1rem, 1.3vw, 2.2rem);
+  font-size: clamp(1rem, 1.7vw, 2.2rem);
   padding: 1rem 3rem;
 }
 
@@ -151,31 +150,15 @@ span.color4 {
   width: 100%;
   position: absolute;
   bottom: 14px;
-  font-size: clamp(1rem, 1vw, 2rem);
+  font-size: clamp(1rem, 0vw, 2rem);
 }
 
-#particles-js canvas {
-  display: block;
-  vertical-align: bottom;
-  -webkit-transform: scale(1);
-  -ms-transform: scale(1);
-  transform: scale(1);
-  opacity: 1;
-  -webkit-transition: opacity 0.8s ease, -webkit-transform 1.4s ease;
-  transition: opacity 0.8s ease, transform 1.4s ease
+.telephone {
+  font-size: clamp(1rem, 1vw, 2.2rem);
 }
 
-#particles-js {
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  z-index: -10;
-  top: 0;
-  left: 0
-}
-
-.telephone, .email {
-  font-size: clamp(1rem, 1.3vw, 2.2rem);
+.email {
+  font-size: clamp(1rem, 1.1vw, 2.2rem);
 }
 
 /* Fallback styling, taken from Normalize: https://github.com/necolas/normalize.css */
@@ -283,7 +266,7 @@ span.color4 {
   }
   .logo {
     padding: 0 0.75rem;
-    font-size: clamp(0.28rem, calc(100vw / 68), 1.35rem);
+    /* font-size: clamp(0.28rem, calc(100vw / 68), 1.35rem); */
     line-height: 0.8;
     margin: 0 auto 1.25rem;
   }
@@ -319,9 +302,9 @@ span.color4 {
 }
 
 @media (max-width: 360px) {
-  .logo {
+  /* .logo {
     font-size: clamp(0.25rem, calc(100vw / 72), 1.1rem);
-  }
+  } */
   #description,
   .telephone,
   .email,
