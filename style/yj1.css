@@ -1,7 +1,7 @@
 @font-face {
   font-family: doto;
   src: url(../fonts/Doto-Regular.ttf);
-  font-display: block
+  font-display: block;
 }
 
 html {
@@ -9,7 +9,7 @@ html {
   display: table;
   height: 100%;
   text-align: center;
-  width: 100%
+  width: 100%;
 }
 
 body {
@@ -17,28 +17,12 @@ body {
   vertical-align: middle;
   margin: 2em auto;
   font-family: doto;
-  color: #11ece5
+  color: #11ece5;
 }
 
 a {
   color: #fff;
-  text-decoration: none
-}
-
-span.color1 {
-  color: #fff
-}
-
-span.color2 {
-  color: #00f7ff
-}
-
-span.color3 {
-  color: rgb(255, 0, 0)
-}
-
-span.color4 {
-  color: rgb(225, 0, 255)
+  text-decoration: none;
 }
 
 .main {
@@ -46,16 +30,7 @@ span.color4 {
   transform: translateZ(0) translate3D(0, 0, 0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  will-change: opacity
-}
-
-#backgroundContainer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -111;
-  /* height: 100%; */
-  /* width: 100%; */
+  will-change: opacity;
 }
 
 #background {
@@ -68,8 +43,8 @@ span.color4 {
   height: 100%;
   width: -webkit-fill-available;
   width: -moz-available;
-  padding: 0 18px;
   overflow: hidden;
+  padding: 0 18px;
   text-align: left;
   font-size: clamp(0.7rem, 1.3vw, 0.7rem);
 }
@@ -79,44 +54,10 @@ span.color4 {
   animation: blink 500ms linear infinite alternate;
 }
 
-#space{
-  height: 100%;
-}
-
 #connections {
   color: #fff;
   width: 100%;
   min-height: 3rem;
-}
-
-@-webkit-keyframes blink {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@-moz-keyframes blink {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes blink {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
 }
 
 .logo {
@@ -136,14 +77,6 @@ span.color4 {
 #description {
   font-size: clamp(1rem, 1.7vw, 2.2rem);
   padding: 1rem 3rem;
-}
-
-.languages {
-  font-size: clamp(1rem, 1.3vw, 2.2rem);
-}
-
-.languages-jp {
-  font-size: clamp(1rem, 1.3vw, 2.2rem);
 }
 
 #bottom {
@@ -189,59 +122,25 @@ span.color4 {
   text-align: right;
 }
 
-@-webkit-keyframes buzz {
-  70% {
-    opacity: 0.8
-  }
-}
-
-@keyframes buzz {
-  70% {
-    opacity: 0.8
-  }
-}
-
-@-webkit-keyframes blink {
-  40% {
-    opacity: 1
-  }
-
-  42% {
-    opacity: 0.8
-  }
-
-  43% {
-    opacity: 1
-  }
-
-  45% {
-    opacity: 0.2
-  }
-
-  46% {
-    opacity: 1
-  }
-}
-
 @keyframes blink {
   40% {
-    opacity: 1
+    opacity: 1;
   }
 
   42% {
-    opacity: 0.8
+    opacity: 0.8;
   }
 
   43% {
-    opacity: 1
+    opacity: 1;
   }
 
   45% {
-    opacity: 0.2
+    opacity: 0.2;
   }
 
   46% {
-    opacity: 1
+    opacity: 1;
   }
 }
 
@@ -272,9 +171,7 @@ span.color4 {
   }
   #description,
   .telephone,
-  .email,
-  .languages,
-  .languages-jp {
+  .email {
     font-size: clamp(0.85rem, 3.2vw, 1.1rem);
     padding: 0.75rem 1.5rem;
   }
@@ -307,9 +204,7 @@ span.color4 {
   } */
   #description,
   .telephone,
-  .email,
-  .languages,
-  .languages-jp {
+  .email {
     padding: 0.5rem 1rem;
   }
 }
