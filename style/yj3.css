@@ -1,7 +1,10 @@
 @font-face {
   font-family: doto;
-  src: url(../fonts/Doto-Regular.ttf);
-  font-display: block;
+  src: url(../fonts/Doto-Black.woff2) format("woff2");
+  /*font-display: block;*/
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 html {
@@ -16,8 +19,10 @@ body {
   display: table-cell;
   vertical-align: middle;
   margin: 2em auto;
-  font-family: doto;
+  font-family: doto, sans-serif;
   color: #11ece5;
+  font-weight: 300;
+  font-variation-settings: "wght" 300, "ROND" 11;
 }
 
 a {
@@ -64,14 +69,13 @@ a {
   display: inline-block;
   margin: 0 auto 1.5rem;
   padding: 0 1rem;
-  font-family: doto, "Fira Code", "SFMono-Regular", "Courier New", monospace;
-  font-weight: 600;
+  font-family: doto, sans-serif;
   line-height: 1;
-  letter-spacing: 0;
-  white-space: pre;
   color: #fff;
   text-align: center;
   font-size: clamp(2.5rem, 11vw, 7rem);
+  font-weight: 400;
+  font-variation-settings: "wght" 400, "ROND" 1;
 }
 
 #description {
