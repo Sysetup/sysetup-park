@@ -94,7 +94,7 @@ body > pre {
 }
 
 #description {
-  font-size: clamp(1rem, 1.7vw, 2.2rem);
+  font-size: clamp(1.15rem, 1.9vw, 2rem);
   padding: 1rem 3rem;
 }
 
@@ -102,15 +102,15 @@ body > pre {
   width: 100%;
   margin-top: auto;
   padding-top: 1rem;
-  font-size: clamp(1rem, 0vw, 2rem);
+  font-size: clamp(0.72rem, 1.1vw, 0.9rem);
 }
 
 .telephone {
-  font-size: clamp(1rem, 1vw, 2.2rem);
+  font-size: clamp(1rem, 1.4vw, 1.5rem);
 }
 
 .email {
-  font-size: clamp(1rem, 1.1vw, 2.2rem);
+  font-size: clamp(1rem, 1.4vw, 1.5rem);
 }
 
 /* Fallback styling, taken from Normalize: https://github.com/necolas/normalize.css */
@@ -173,10 +173,13 @@ body > pre {
     line-height: 0.8;
     margin: 0 auto 1.25rem;
   }
-  #description,
+  #description {
+    font-size: clamp(1rem, 3.6vw, 1.3rem);
+    padding: 0.6rem 1.5rem;
+  }
   .telephone,
   .email {
-    font-size: clamp(0.85rem, 3.2vw, 1.1rem);
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
     padding: 0.6rem 1.5rem;
   }
   #background {
@@ -185,7 +188,7 @@ body > pre {
   }
   #bottom {
     width: auto;
-    font-size: clamp(0.85rem, 2.8vw, 1.1rem);
+    font-size: clamp(0.7rem, 2.2vw, 0.85rem);
   }
   #client {
     margin: 0;
@@ -218,13 +221,16 @@ body > pre {
     margin: 0 auto 0.5rem;
   }
   #description {
-    font-size: clamp(0.8rem, 2.6vh, 1rem);
+    font-size: clamp(0.9rem, 3vh, 1.15rem);
     padding: 0.4rem 1.5rem;
   }
   .telephone,
   .email {
-    font-size: clamp(0.8rem, 2.6vh, 1rem);
+    font-size: clamp(0.8rem, 2.4vh, 1rem);
     padding: 0.2rem 1rem;
+  }
+  #bottom {
+    font-size: clamp(0.68rem, 1.9vh, 0.82rem);
   }
   #client {
     padding: 0.4rem 1rem;
