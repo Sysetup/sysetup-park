@@ -9,16 +9,18 @@
 
 html {
   background-color: #0f1724;
-  display: table;
-  height: 100%;
   text-align: center;
   width: 100%;
 }
 
 body {
-  display: table-cell;
-  vertical-align: middle;
-  margin: 2em auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 1.5rem 0;
+  box-sizing: border-box;
   font-family: doto, sans-serif;
   color: #11ece5;
   font-weight: 300;
@@ -31,6 +33,12 @@ a {
 }
 
 .main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
   -webkit-transform: translateZ(0) translate3D(0, 0, 0);
   transform: translateZ(0) translate3D(0, 0, 0);
   -webkit-backface-visibility: hidden;
@@ -39,7 +47,7 @@ a {
 }
 
 #background {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   z-index: -100;
@@ -65,6 +73,13 @@ a {
   min-height: 3rem;
 }
 
+/* The <pre> only holds the fixed-position decorative code; keep it out of the
+   flex flow so it doesn't add stray spacing before the footer. */
+body > pre {
+  margin: 0;
+  height: 0;
+}
+
 .logo {
   display: inline-block;
   margin: 0 auto 1.5rem;
@@ -85,8 +100,8 @@ a {
 
 #bottom {
   width: 100%;
-  position: absolute;
-  bottom: 14px;
+  margin-top: auto;
+  padding-top: 1rem;
   font-size: clamp(1rem, 0vw, 2rem);
 }
 
@@ -148,28 +163,13 @@ a {
   }
 }
 
-@media (max-width: 575.98px) {
-  html {
-    display: block;
-    height: auto;
-  }
+@media (max-width: 575.98px), (max-height: 600px) {
   body {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 1.5rem 0;
-    padding: 0 0.75rem;
-    width: 100%;
+    padding: 1rem 0.75rem;
     font-size: 1rem;
-    min-height: 100vh;
-  }
-  .main {
-    width: 100%;
   }
   .logo {
     padding: 0 0.75rem;
-    /* font-size: clamp(0.28rem, calc(100vw / 68), 1.35rem); */
     line-height: 0.8;
     margin: 0 auto 1.25rem;
   }
@@ -177,7 +177,7 @@ a {
   .telephone,
   .email {
     font-size: clamp(0.85rem, 3.2vw, 1.1rem);
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.5rem;
   }
   #background {
     font-size: clamp(0.7rem, 1.3vw, 0.7rem);
@@ -185,8 +185,6 @@ a {
   }
   #bottom {
     width: auto;
-    left: 0.75rem;
-    right: 0.75rem;
     font-size: clamp(0.85rem, 2.8vw, 1.1rem);
   }
   #client {
@@ -199,6 +197,40 @@ a {
     padding: 0 0.75rem;
     word-break: break-word;
     white-space: normal;
+  }
+}
+
+/* Landscape phones: wide but very short viewport. Compact everything so the
+   footer (client / date / time / connections) never overlaps the main block. */
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    padding: 0.75rem 0.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  .main {
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+  }
+  .logo {
+    font-size: clamp(2rem, 8vh, 3.5rem);
+    margin: 0 auto 0.5rem;
+  }
+  #description {
+    font-size: clamp(0.8rem, 2.6vh, 1rem);
+    padding: 0.4rem 1.5rem;
+  }
+  .telephone,
+  .email {
+    font-size: clamp(0.8rem, 2.6vh, 1rem);
+    padding: 0.2rem 1rem;
+  }
+  #client {
+    padding: 0.4rem 1rem;
+  }
+  #connections {
+    min-height: 1.8rem;
   }
 }
 
