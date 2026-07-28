@@ -290,8 +290,46 @@
         }
     };
 
-    // Load the finite, build-time generated code background snapshot.
-    // Generate it with: node scripts/build-background.mjs
+    // Background streaming pacing, tuned to read like a real console / agent
+    // stream: short bursts of a few lines, occasional longer pauses, and an
+    // extra beat whenever a new file block starts. Kept deliberately cheap:
+    // one plain-string buffer, one textContent write per tick.
+    const STREAM_MIN_LINES = 1;
+    const STREAM_MAX_LINES = 3;
+    const STREAM_LINE_DELAY_MIN_MS = 28;
+    const STREAM_LINE_DELAY_MAX_MS = 130;
+    const STREAM_BLOCK_PAUSE_MS = 480;
+    const STREAM_BURST_PAUSE_MS = 900;
+    const STREAM_BURST_EVERY = 9; // ~every N ticks, breathe a little longer
+    // Keep only this many trailing lines so the buffer stays bounded while the
+    // stream loops forever; ~2-3 screens of history, well under any layout cost.
+    const STREAM_MAX_LINES_KEPT = 90;
+    // Characters to reveal in one go when priming, so the stream starts near
+    // the bottom of the screen instead of on an empty page.
+    const STREAM_PRIME_LINES = 70;
+
+    // Split the snapshot into streamable plain-text lines. The snapshot is a
+    // finite set of highlighted code blocks; we keep only its text so the
+    // runtime cost is a single string, not a growing DOM tree.
+    const snapshotToLines = (snapshot) => {
+        const lines = [];
+        const blocks = snapshot.querySelectorAll(".code-block, .spacer");
+        blocks.forEach((block) => {
+            if (block.classList.contains("spacer")) {
+                lines.push("");
+                return;
+            }
+            const text = block.textContent.replace(/\r/g, "");
+            text.split("\n").forEach((line) => lines.push(line));
+            lines.push(""); // blank line between files, like separate console outputs
+        });
+        return lines;
+    };
+
+    // Load the finite, build-time generated code background snapshot and
+    // stream it like a Linux console / AI agent chat: lines appear
+    // progressively, old history scrolls off the top, and the corpus loops
+    // forever. Generate it with: node scripts/build-background.mjs
     const loadCodeBackground = async () => {
         const backgroundElement = document.getElementById("background");
         if (!backgroundElement) return;
@@ -336,78 +374,92 @@
             });
         }
 
-        // Append the snapshot content twice so the smooth scroll can wrap
-        // seamlessly. A div wrapper avoids nesting <pre> inside the target
-        // <code> element.
         backgroundElement.innerHTML = "";
-        const firstPass = document.createElement("div");
-        Array.from(snapshot.childNodes).forEach((node) => {
-            firstPass.appendChild(document.importNode(node, true));
-        });
-        backgroundElement.appendChild(firstPass);
-        if (!prefersReducedMotion()) {
-            const secondPass = document.importNode(firstPass, true);
-            secondPass.setAttribute("aria-hidden", "true");
-            backgroundElement.appendChild(secondPass);
-        }
-        setupSmoothScrolling(backgroundElement);
+        startBackgroundStream(backgroundElement, snapshot);
     };
 
     const prefersReducedMotion = () =>
         typeof matchMedia === "function" &&
         matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Setup smooth, continuous scrolling. The loop only runs while the tab is
-    // visible, never runs under prefers-reduced-motion, and wraps over the
-    // first copy of the duplicated snapshot (RF-005 lifecycle).
-    const setupSmoothScrolling = (backgroundElement) => {
-        if (prefersReducedMotion()) return;
+    // Stream the snapshot lines into the background like a live console.
+    // All state lives in plain JS strings; the DOM is touched exactly once per
+    // tick (a single textContent assignment), so the effect is cheap even on
+    // low-end devices. Under prefers-reduced-motion the snapshot is shown
+    // statically instead.
+    const startBackgroundStream = (backgroundElement, snapshot) => {
+        const lines = snapshotToLines(snapshot);
+        if (!lines.length) return;
 
-        const passes = backgroundElement.children;
-        if (passes.length < 2) return;
-        const loopHeight = passes[0].offsetHeight;
-        if (loopHeight <= 0) return;
+        if (prefersReducedMotion()) {
+            backgroundElement.textContent = lines.join("\n");
+            return;
+        }
 
-        // CSS pixels advanced per second; keeps the calm drift of the
-        // previous 11px-per-frame loop (~1 line/s at 60fps).
-        const pixelsPerSecond = 165;
-        let scrollPos = 0;
-        let lastTimestamp = null;
-        let rafId = 0;
-        let running = false;
+        let buffer = [];
+        let lineIndex = 0;
+        let tickCount = 0;
+        let timerId = 0;
 
-        const step = (timestamp) => {
-            if (!running) return;
-            if (lastTimestamp === null) lastTimestamp = timestamp;
-            const deltaSeconds = Math.min((timestamp - lastTimestamp) / 1000, 0.1);
-            lastTimestamp = timestamp;
-            scrollPos = (scrollPos + pixelsPerSecond * deltaSeconds) % loopHeight;
-            backgroundElement.scrollTop = scrollPos;
-            rafId = requestAnimationFrame(step);
+        const render = () => {
+            backgroundElement.textContent = buffer.join("\n");
         };
 
-        const start = () => {
-            if (running || prefersReducedMotion()) return;
-            running = true;
-            lastTimestamp = null;
-            rafId = requestAnimationFrame(step);
+        const pushLines = (count) => {
+            let startedNewBlock = false;
+            for (let i = 0; i < count; i++) {
+                const line = lines[lineIndex];
+                // A blank line followed by a non-blank one marks a new file.
+                if (line === "" && lines[(lineIndex + 1) % lines.length] !== "") {
+                    startedNewBlock = true;
+                }
+                buffer.push(line);
+                lineIndex = (lineIndex + 1) % lines.length;
+            }
+            if (buffer.length > STREAM_MAX_LINES_KEPT) {
+                buffer.splice(0, buffer.length - STREAM_MAX_LINES_KEPT);
+            }
+            return startedNewBlock;
         };
 
-        const stop = () => {
-            running = false;
-            if (rafId) cancelAnimationFrame(rafId);
-            rafId = 0;
+        const nextDelay = (startedNewBlock) => {
+            tickCount += 1;
+            let delay =
+                STREAM_LINE_DELAY_MIN_MS +
+                Math.random() * (STREAM_LINE_DELAY_MAX_MS - STREAM_LINE_DELAY_MIN_MS);
+            if (startedNewBlock) delay += STREAM_BLOCK_PAUSE_MS;
+            else if (tickCount % STREAM_BURST_EVERY === 0) delay += STREAM_BURST_PAUSE_MS;
+            return Math.round(delay);
+        };
+
+        const step = () => {
+            const burst =
+                STREAM_MIN_LINES +
+                Math.floor(Math.random() * (STREAM_MAX_LINES - STREAM_MIN_LINES + 1));
+            const startedNewBlock = pushLines(burst);
+            render();
+            timerId = setTimeout(step, nextDelay(startedNewBlock));
+        };
+
+        const clearTimer = () => {
+            if (timerId) clearTimeout(timerId);
+            timerId = 0;
         };
 
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) {
-                stop();
+                clearTimer();
             } else {
-                start();
+                clearTimer();
+                timerId = setTimeout(step, STREAM_LINE_DELAY_MIN_MS);
             }
         });
 
-        start();
+        // Prime enough history so the stream starts near the bottom of the
+        // screen, then let the paced loop take over.
+        pushLines(STREAM_PRIME_LINES);
+        render();
+        timerId = setTimeout(step, STREAM_LINE_DELAY_MIN_MS);
     };
 
     // Type shuffled marketing descriptions into the hero, holding each one
