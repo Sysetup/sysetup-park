@@ -155,11 +155,18 @@
     };
 
     // Visitor connection info for the footer. Lookup priority:
-    //   1. Same-origin Cloudflare Worker (/api/geo, request.cf fields).
-    //   2. GeoJS (https://get.geojs.io) as a keyless third-party fallback.
+    //   1. Cloudflare Worker (request.cf fields), then
+    //   2. GeoJS (https://get.geojs.io) as a keyless third-party fallback, then
     //   3. Local, tracker-free summary when no remote source answers.
     // GetGeoAPI and its browser key were removed entirely (RF-001/RF-002).
-    const GEO_WORKER_PATH = "/api/geo";
+    //
+    // The site is hosted on GitHub Pages and the domain DNS is NOT managed by
+    // Cloudflare, so the Worker cannot run as a same-origin route. Deploy it
+    // on its default *.workers.dev hostname (see worker/README.md, Option B)
+    // and paste the assigned URL below. Empty string disables the Worker
+    // lookup and goes straight to the GeoJS fallback. If the domain ever moves
+    // behind the Cloudflare proxy, the relative path "/api/geo" also works.
+    const GEO_WORKER_URL = "https://sysetup-geolocation.sysetup.workers.dev";
     const GEOJS_URL = "https://get.geojs.io/v1/ip/geo.json";
     const GEO_TIMEOUT_MS = 4000;
 
@@ -212,9 +219,19 @@
             startTypewriter(connectionsElement, shuffleArray(filtered), CONNECTIONS_HOLD_MS);
         };
 
-        // 1) Cloudflare Worker (same-origin; request.cf on every plan).
+        // 1) Cloudflare Worker (request.cf on every plan). Skipped entirely
+        //    when GEO_WORKER_URL is not configured (Worker not deployed yet).
         try {
-            const data = await fetchJsonBounded(GEO_WORKER_PATH);
+            if (!GEO_WORKER_URL) {
+                // Expected state until the Worker is deployed; not a failure,
+                // so it must not log to the console.
+                const skip = new Error("geo worker URL not configured");
+                skip.expected = true;
+                throw skip;
+            }
+            const data = await fetchJsonBounded(GEO_WORKER_URL, {
+                allowCrossOrigin: true,
+            });
             const messages = buildGeoMessages({
                 ip: pickField(data && data.ip),
                 city: pickField(data && data.city),
@@ -228,7 +245,9 @@
                 return;
             }
         } catch (error) {
-            console.info("Geo worker unavailable; trying GeoJS fallback.", error.message);
+            if (!error.expected) {
+                console.info("Geo worker unavailable; trying GeoJS fallback.", error.message);
+            }
         }
 
         // 2) GeoJS fallback (no API key required).
