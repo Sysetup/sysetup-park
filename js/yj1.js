@@ -15,95 +15,169 @@
     // so each message can be read, erases quickly, then moves to the next one,
     // looping forever.
     //
-    // DOM writes are append-only spans while typing, so the layout engine
-    // never re-processes already-typed text (unlike `textContent +=`).
-    // All timers pause with the tab via the visibilitychange listener, so the
-    // effect never drifts or bursts after the tab is hidden.
-    // Typing rhythm: base speed of a fast typist (~130 wpm), with jitter,
-    // slower starts after a hold, brief hesitations on punctuation/space, and
-    // occasional short bursts of extra speed. Erasing stays brisk.
-    const TYPE_CHAR_MS = 52;
+    // DOM writes append one text node per character, so the layout engine never
+    // re-processes already-typed text. All timers pause with the tab via the
+    // visibilitychange listener, so the effect never drifts after a tab switch.
+    // The rhythm varies around a normal typing pace, with word boundaries,
+    // punctuation, small bursts, and occasional thinking pauses.
+    const TYPE_CHAR_MS = 68;
     const ERASE_CHAR_MS = 18;
+    const MIN_TYPE_DELAY_MS = 32;
+    const DESCRIPTION_CHANGE_INTERVAL_MS = 18_000;
+
+    const getCurrentTime = () =>
+        typeof performance !== 'undefined' ? performance.now() : Date.now();
 
     // Returns a natural-feeling delay before typing the next character.
     // `previous` is the char just typed; `next` is the upcoming one.
     const humanTypingDelay = (previous, next) => {
-        let delay = TYPE_CHAR_MS + (Math.random() - 0.5) * 34; // ±17 ms jitter
-        // Slow down slightly right after a long hold or message start.
-        if (previous === "") delay *= 1.9;
-        // Hesitate a touch after sentence punctuation and before spaces.
-        if (".:!?".includes(previous)) delay += 140 + Math.random() * 160;
-        else if (",;".includes(previous)) delay += 70 + Math.random() * 90;
-        else if (previous === " ") delay += 25 + Math.random() * 45;
-        // Occasional short burst of speed (~15% of keystrokes).
-        if (Math.random() < 0.15) delay *= 0.45;
-        // Rare moment of doubt before an uppercase or digit-heavy token.
-        if (/[A-Z0-9]/.test(next) && Math.random() < 0.08) delay += 220 + Math.random() * 260;
-        return Math.max(28, Math.round(delay));
+        let delay = TYPE_CHAR_MS + (Math.random() - 0.5) * 24;
+        const nextCharacter = typeof next === 'string' ? next : '';
+
+        // A person tends to settle into a sentence after the first keystroke.
+        if (previous === '') delay += 120 + Math.random() * 140;
+        // Word boundaries get a little more space on either side.
+        if (nextCharacter === ' ') delay += 30 + Math.random() * 45;
+        if (previous === ' ') delay += 35 + Math.random() * 65;
+        // Punctuation creates a natural pause before the next thought.
+        if ('.:!?'.includes(previous)) delay += 180 + Math.random() * 180;
+        else if (',;'.includes(previous)) delay += 80 + Math.random() * 110;
+        // Occasionally pause as if the writer is deciding what comes next.
+        if (Math.random() < 0.08) delay += 180 + Math.random() * 300;
+        // Short runs of faster keystrokes keep the rhythm from sounding metronomic.
+        if (Math.random() < 0.12) delay *= 0.55;
+        // Capitalized or numeric tokens often take a fraction longer to begin.
+        if (/[A-Z0-9]/.test(nextCharacter) && Math.random() < 0.08) {
+            delay += 180 + Math.random() * 240;
+        }
+        return Math.max(MIN_TYPE_DELAY_MS, Math.round(delay));
     };
 
-    const startTypewriter = (element, messages, holdMs) => {
+    /**
+     * Types messages with either a hold duration or a fixed start interval.
+     *
+     * @function startTypewriter
+     * @param {HTMLElement} element Target element for the animation.
+     * @param {string[]} messages Messages to type in sequence.
+     * @param {{holdMs?: number, changeIntervalMs?: number}} timing Timing mode.
+     * @return {void}
+     */
+    const startTypewriter = (element, messages, timing = {}) => {
         if (!element || !messages.length) return;
 
-        const typedSpan = document.createElement("span");
-        element.textContent = "";
+        const {
+            holdMs = 0,
+            changeIntervalMs = 0,
+        } = timing;
+        const usesFixedChangeInterval = changeIntervalMs > 0;
+        const typedSpan = document.createElement('span');
+        element.textContent = '';
         element.appendChild(typedSpan);
 
         let timerId = 0;
         let messageIndex = 0;
         let charIndex = 0;
-        let state = "typing";
-        let previousChar = "";
-
-        const step = () => {
-            if (state === "typing") {
-                const message = messages[messageIndex];
-                const char = message[charIndex];
-                typedSpan.textContent += char;
-                previousChar = char;
-                charIndex += 1;
-                if (charIndex < message.length) {
-                    timerId = setTimeout(step, humanTypingDelay(previousChar, message[charIndex]));
-                } else {
-                    state = "holding";
-                    timerId = setTimeout(step, holdMs);
-                }
-                return;
-            }
-            if (state === "holding") {
-                state = "erasing";
-                timerId = setTimeout(step, ERASE_CHAR_MS);
-                return;
-            }
-            // Erasing.
-            const text = typedSpan.textContent;
-            if (text) {
-                typedSpan.textContent = text.slice(0, -1);
-                timerId = setTimeout(step, ERASE_CHAR_MS);
-                return;
-            }
-            messageIndex = (messageIndex + 1) % messages.length;
-            charIndex = 0;
-            previousChar = "";
-            state = "typing";
-            timerId = setTimeout(step, TYPE_CHAR_MS);
-        };
+        let state = 'typing';
+        let previousChar = '';
+        let nextMessageAt = 0;
+        let hiddenAt = 0;
 
         const clearTimer = () => {
             if (timerId) clearTimeout(timerId);
             timerId = 0;
         };
 
-        document.addEventListener("visibilitychange", () => {
+        const schedule = (delay, callback) => {
+            clearTimer();
+            timerId = setTimeout(callback, Math.max(0, Math.round(delay)));
+        };
+
+        const getDelayUntilNextMessage = () =>
+            Math.max(0, nextMessageAt - getCurrentTime());
+
+        const getDelayForCurrentState = () => {
+            const message = messages[messageIndex];
+            if (state === 'typing') {
+                const isStartingMessage =
+                    charIndex === 0 && typedSpan.textContent === '';
+                if (usesFixedChangeInterval && isStartingMessage && nextMessageAt) {
+                    return getDelayUntilNextMessage();
+                }
+                return humanTypingDelay(previousChar, message?.[charIndex] ?? '');
+            }
+            if (state === 'holding') {
+                if (!usesFixedChangeInterval) return holdMs;
+                const eraseDuration =
+                    (typedSpan.textContent.length + 1) * ERASE_CHAR_MS;
+                return Math.max(0, getDelayUntilNextMessage() - eraseDuration);
+            }
+            return ERASE_CHAR_MS;
+        };
+
+        const step = () => {
+            const message = messages[messageIndex];
+            if (state === 'typing') {
+                const isStartingMessage =
+                    charIndex === 0 && typedSpan.textContent === '';
+                if (usesFixedChangeInterval && isStartingMessage) {
+                    const currentTime = getCurrentTime();
+                    if (nextMessageAt > currentTime) {
+                        schedule(nextMessageAt - currentTime, step);
+                        return;
+                    }
+                    nextMessageAt = currentTime + changeIntervalMs;
+                }
+
+                const char = message[charIndex];
+                typedSpan.appendChild(document.createTextNode(char));
+                previousChar = char;
+                charIndex += 1;
+                if (charIndex < message.length) {
+                    schedule(humanTypingDelay(previousChar, message[charIndex]), step);
+                } else {
+                    state = 'holding';
+                    schedule(getDelayForCurrentState(), step);
+                }
+                return;
+            }
+            if (state === 'holding') {
+                state = 'erasing';
+                schedule(ERASE_CHAR_MS, step);
+                return;
+            }
+            // Erasing.
+            if (typedSpan.lastChild) {
+                typedSpan.removeChild(typedSpan.lastChild);
+                schedule(ERASE_CHAR_MS, step);
+                return;
+            }
+            messageIndex = (messageIndex + 1) % messages.length;
+            charIndex = 0;
+            previousChar = '';
+            state = 'typing';
+            schedule(
+                usesFixedChangeInterval
+                    ? getDelayUntilNextMessage()
+                    : humanTypingDelay('', messages[messageIndex]?.[charIndex] ?? ''),
+                step,
+            );
+        };
+
+        document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
+                hiddenAt = getCurrentTime();
                 clearTimer();
             } else {
+                if (hiddenAt && usesFixedChangeInterval) {
+                    nextMessageAt += getCurrentTime() - hiddenAt;
+                }
+                hiddenAt = 0;
                 clearTimer();
-                timerId = setTimeout(step, humanTypingDelay(previousChar, messages[messageIndex]?.[charIndex] ?? ""));
+                schedule(getDelayForCurrentState(), step);
             }
         });
 
-        timerId = setTimeout(step, humanTypingDelay("", messages[0]?.[0] ?? ""));
+        schedule(humanTypingDelay('', messages[0]?.[0] ?? ''), step);
     };
 
     // Fisher-Yates shuffle; keeps the typed message cycles fresh.
@@ -216,7 +290,9 @@
         const typeMessages = (messages) => {
             const filtered = messages.filter(Boolean);
             if (!filtered.length) return;
-            startTypewriter(connectionsElement, shuffleArray(filtered), CONNECTIONS_HOLD_MS);
+            startTypewriter(connectionsElement, shuffleArray(filtered), {
+                holdMs: CONNECTIONS_HOLD_MS,
+            });
         };
 
         // 1) Cloudflare Worker (request.cf on every plan). Skipped entirely
@@ -510,7 +586,9 @@
         const descriptionElement = document.getElementById("description");
         if (!descriptionElement || !descriptions.length) return;
 
-        startTypewriter(descriptionElement, shuffleArray(descriptions), 8000);
+        startTypewriter(descriptionElement, shuffleArray(descriptions), {
+            changeIntervalMs: DESCRIPTION_CHANGE_INTERVAL_MS,
+        });
     };
 
     // Consent-based analytics: the Google tag is never loaded automatically.
