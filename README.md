@@ -10,7 +10,7 @@
 ```
 
 ## Overview
-SYSETUP Website is a lightweight, single-page experience that communicates the brand’s systems-engineering focus through ASCII visuals, real-time telemetry, and curated messaging. The site renders static HTML, CSS, and vanilla JavaScript assets without a server-side component, which makes it suitable for static hosting platforms or CDN delivery.
+SYSETUP Website is a lightweight, single-page experience that communicates the brand’s systems-engineering focus through ASCII visuals, curated messaging, and a legacy runtime telemetry path that is being removed by the controlled refactor. The site renders static HTML, CSS, and vanilla JavaScript assets without a server-side component, which makes it suitable for static hosting platforms or CDN delivery.
 
 ## Key Features
 - **Hero experience** that combines ASCII art, rotating service descriptions, and direct contact links.
@@ -31,3 +31,9 @@ SYSETUP Website is a lightweight, single-page experience that communicates the b
 
 ## Support
 For enhancements or incident response, capture the issue details and contact the SYSETUP engineering team through the standard service channel. Include browser, viewport size, API response logs, and any reproduction steps to accelerate triage.
+
+## Engineering baseline
+
+The controlled requirements, architecture, audit findings, refactor backlog,
+test strategy, security controls, performance budgets, risks, and traceability
+matrix are maintained in [`docs/README.md`](docs/README.md).
