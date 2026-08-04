@@ -1,0 +1,58 @@
+/* sysetup / local presentation stream */
+
+<main id="main-content">
+    <section class="hero">
+        <p>analysis, design, development, maintenance</p>
+        <address>carlos@sysetup.com</address>
+    </section>
+</main>
+
+const project = {
+    scope: 'systems development',
+    surface: 'small, useful, maintainable',
+};
+
+function shapeTheWork(requirements) {
+    return requirements
+        .map(analyze)
+        .map(design)
+        .map(build)
+        .map(maintain);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ambient-code { display: none; }
+}
+
+<header class="site-header">
+    <h1>SYSETUP</h1>
+</header>
+
+export const contact = {
+    phone: '+57 311 641 7210',
+    email: 'carlos@sysetup.com',
+};
+
+/* clear boundaries */
+/* explicit content */
+/* local assets */
+/* progressive enhancement */
+/* calm interfaces */
+
+<link rel="stylesheet" href="style/site.css">
+<script type="module" src="js/app.js"></script>
+
+const lifecycle = {
+    observe: () => 'visible',
+    pause: () => 'hidden',
+    resume: () => 'visible',
+};
+
+function keepTheEssentialContent() {
+    return 'HTML first, optional behavior second.';
+}
+
+/*
+ * The background is decorative text. It is never parsed as markup,
+ * never used as a data source, and never allowed to leave this origin.
+ */

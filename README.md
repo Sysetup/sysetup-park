@@ -1,39 +1,47 @@
-# SYSETUP informative Website
+# SYSETUP website
 
-```console
-   ____             __             
-  / __/_ _____ ___ / /___ _____ _/|
- _\ \/ // (_-</ -_) __/ // / _ > _<
-/___/\_, /___/\__/\__/\_,_/ .__//  
-    /___/                /_/       
-> Systems development company.
-```
+SYSETUP is a small static website for the systems development company. The
+runtime is deliberately limited to HTML, CSS, and browser JavaScript with
+local assets only.
 
-## Overview
-SYSETUP Website is a lightweight, single-page experience that communicates the brand’s systems-engineering focus through ASCII visuals, curated messaging, and a legacy runtime telemetry path that is being removed by the controlled refactor. The site renders static HTML, CSS, and vanilla JavaScript assets without a server-side component, which makes it suitable for static hosting platforms or CDN delivery.
+## Runtime structure
 
-## Key Features
-- **Hero experience** that combines ASCII art, rotating service descriptions, and direct contact links.
+- `index.html` contains the complete semantic document and essential contact
+  information.
+- `style/site.css` contains the consolidated visual system and responsive
+  behavior.
+- `js/app.js` bootstraps optional enhancements.
+- `js/content.js` contains presentation copy and bounded asset constants.
+- `js/modules/` contains the clock, typewriter, background stream, and bounded
+  local-text loader.
+- `assets/background.txt` is the local decorative text corpus.
+- `fonts/Doto-Black.woff2` and `favicon.png` are local presentation assets.
+- `CNAME` records the site domain expected by the hosting boundary.
 
-## Solution Architecture
-- **HTML (`index.html`)** holds the single-page layout and script includes.
+The page remains useful when JavaScript or the optional background asset is
+unavailable: the description, contact links, and company statement are
+rendered directly in HTML.
 
-## Prerequisites
-- Modern browser supporting ES6 modules, Fetch API, and CSS clamp functions.
+## Content changes
 
-## Local Preview
-- The project is static; any HTTP server or editor Live Preview extension is sufficient.
+Keep essential copy in `index.html` and rotating decorative copy in
+`js/content.js`. When changing the background, edit `assets/background.txt`
+as plain text only. It is inserted with `textContent`, never interpreted as
+HTML.
 
-## Deployment
-1. Build step is not required; deploy the repository contents to the target host.
-2. Ensure CDN or hosting platform allows static asset caching and correct MIME types (HTML, CSS, JS, fonts).
-3. Harden transport (HTTPS), enable security headers (`Content-Security-Policy`, `Referrer-Policy`), and configure cache-control directives per organizational standards.
+Use local relative paths for runtime resources. Do not add analytics,
+trackers, remote scripts, remote fonts, or client-side storage without a new
+documented product decision.
 
-## Support
-For enhancements or incident response, capture the issue details and contact the SYSETUP engineering team through the standard service channel. Include browser, viewport size, API response logs, and any reproduction steps to accelerate triage.
+## Local preview
 
-## Engineering baseline
+Open `index.html` through the editor or an existing static-file preview. A
+regular HTTP origin is required for the optional background fetch; direct
+`file://` opening still presents the essential page but may omit that
+decorative layer.
 
-The controlled requirements, architecture, audit findings, refactor backlog,
-test strategy, security controls, performance budgets, risks, and traceability
-matrix are maintained in [`docs/README.md`](docs/README.md).
+The repository contains the website source only. Hosting and release
+operations remain outside this project.
+
+See [`docs/README.md`](docs/README.md) for the current implementation
+contract and scope decisions.
