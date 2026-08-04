@@ -17,7 +17,14 @@
             content="width=device-width,initial-scale=1,viewport-fit=cover"
         />
         <title>SYSETUP</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="Systems Development" />
+        <meta name="robots" content="all" />
+        <link rel="alternate" href="https://sysetup.com/" hreflang="en" />
+        <meta
+            name="keywords"
+            content="Systems, apps, applications, software development"
+        />
         <link rel="canonical" href="https://sysetup.com/" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:type" content="website" />
@@ -31,6 +38,10 @@
         />
         <meta property="og:url" content="https://sysetup.com/" />
         <meta property="og:site_name" content="SYSETUP" />
+        <meta
+            property="og:image"
+            content="https://pbs.twimg.com/profile_images/708121295607734272/ryRdiqN5.jpg"
+        />
         <meta name="twitter:card" content="summary" />
         <meta
             name="twitter:description"
@@ -41,6 +52,10 @@
             content="SYSETUP Systems Development Company"
         />
         <meta name="twitter:site" content="@sysetup" />
+        <meta
+            name="twitter:image"
+            content="https://pbs.twimg.com/profile_images/708121295607734272/ryRdiqN5.jpg"
+        />
         <link
             rel="preload"
             href="fonts/Doto-Black.woff2"
@@ -48,6 +63,7 @@
             type="font/woff2"
             crossorigin
         />
+        <link rel="apple-touch-icon" href="favicon.png" />
         <link rel="icon" type="image/png" href="favicon.png" />
         <link rel="stylesheet" href="style/site.css" />
     </head>
@@ -58,21 +74,15 @@
             data-role="background"
         ></code></pre>
 
-        <header class="site-header">
-            <h1 class="brand">SYSETUP <span class="brand-sup">*</span></h1>
-        </header>
-
         <main class="site-main" id="main-content">
+            <header class="site-header">
+                <h1 class="brand">SYSETUP <span class="brand-sup">*</span></h1>
+            </header>
             <section class="hero" aria-label="Services and contact">
-                <p class="hero-description">
-                    Managing full-cycle projects: analysis, design, dev,
-                    deploy, maintenance.
+                <p class="hero-description" data-role="typewriter">
+                    Managing full-cycle projects: analysis, design, dev, deploy,
+                    maintenance.
                 </p>
-                <p
-                    class="hero-rotator"
-                    aria-hidden="true"
-                    data-role="typewriter"
-                ></p>
                 <address class="contact-list">
                     <a class="contact-link" href="tel:+573116417210"
                         >COL:&nbsp;(+57)3116417210</a
@@ -85,9 +95,10 @@
         </main>
 
         <footer class="site-footer">
+            <div class="client" aria-hidden="true"></div>
             <p class="status-clock">
-                <time data-role="date" datetime=""></time>
-                <time data-role="time" datetime=""></time>
+                <span data-role="date"></span>
+                <span data-role="time"></span>
             </p>
             <p class="site-note">Systems development company.</p>
         </footer>
