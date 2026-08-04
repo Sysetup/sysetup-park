@@ -56,3 +56,317 @@ function keepTheEssentialContent() {
  * The background is decorative text. It is never parsed as markup,
  * never used as a data source, and never allowed to leave this origin.
  */
+
+
+----
+
+<!--
+
+   ____             __
+  / __/_ _____ ___ / /___ _____ _/|
+ _\ \/ // (_-</ -_) __/ // / _ > _<
+/___/\_, /___/\__/\__/\_,_/ .__//
+    /___/                /_/
+> Systems development company.
+
+-->
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width,initial-scale=1,viewport-fit=cover"
+        />
+        <title>SYSETUP</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="Systems Development" />
+        <meta name="robots" content="all" />
+        <link rel="alternate" href="https://sysetup.com/" hreflang="en" />
+        <meta
+            name="keywords"
+            content="Systems, apps, applications, software development"
+        />
+        <link rel="canonical" href="https://sysetup.com/" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:title"
+            content="SYSETUP Systems Development Company"
+        />
+        <meta
+            property="og:description"
+            content="Live systems &amp; systems for your life"
+        />
+        <meta property="og:url" content="https://sysetup.com/" />
+        <meta property="og:site_name" content="SYSETUP" />
+        <meta
+            property="og:image"
+            content="https://pbs.twimg.com/profile_images/708121295607734272/ryRdiqN5.jpg"
+        />
+        <meta name="twitter:card" content="summary" />
+        <meta
+            name="twitter:description"
+            content="Live systems &amp; systems for your life"
+        />
+        <meta
+            name="twitter:title"
+            content="SYSETUP Systems Development Company"
+        />
+        <meta name="twitter:site" content="@sysetup" />
+        <meta
+            name="twitter:image"
+            content="https://pbs.twimg.com/profile_images/708121295607734272/ryRdiqN5.jpg"
+        />
+        <link
+            rel="preload"
+            href="fonts/Doto-Black.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link rel="apple-touch-icon" href="favicon.png" />
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <link rel="stylesheet" href="style/site.css" />
+    </head>
+
+    <body>
+        <a class="skip-link" href="#main-content">Skip to content</a>
+        <pre class="ambient-code" aria-hidden="true"><code
+            data-role="background"
+        ></code></pre>
+
+        <main class="site-main" id="main-content">
+            <header class="site-header">
+                <h1 class="brand">SYSETUP <span class="brand-sup">*</span></h1>
+            </header>
+            <section class="hero" aria-label="Services and contact">
+                <p class="hero-description" data-role="typewriter">
+                    Managing full-cycle projects: analysis, design, dev, deploy,
+                    maintenance.
+                </p>
+                <address class="contact-list">
+                    <a class="contact-link" href="tel:+573116417210"
+                        >COL:&nbsp;(+57)3116417210</a
+                    >
+                    <a class="contact-link" href="mailto:carlos@sysetup.com"
+                        >carlos@sysetup.com</a
+                    >
+                </address>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="client" aria-hidden="true"></div>
+            <p class="status-clock">
+                <span data-role="date"></span>
+                <span data-role="time"></span>
+            </p>
+            <p class="site-note" data-role="client-location">
+                Systems development company.
+            </p>
+        </footer>
+
+        <script type="module" src="js/app.js"></script>
+    </body>
+</html>
+
+----
+
+import {
+    BACKGROUND_MAX_BYTES,
+    BACKGROUND_MAX_LINES,
+    BACKGROUND_TIMEOUT_MS,
+    BACKGROUND_URL,
+    HERO_MESSAGES,
+    ROTATOR_CHANGE_INTERVAL_MS,
+} from './content.js';
+import { createBackgroundStream } from './modules/background-stream.js';
+import { createClock } from './modules/clock.js';
+import outputLogo from './modules/console-logo.js';
+import { loadBackground } from './modules/load-background.js';
+import { loadGeolocationMessages } from './modules/load-geolocation.js';
+import { createTypewriter, shuffleMessages } from './modules/typewriter.js';
+
+/**
+ * Initialize the console logo, optional clock, message rotators, and background stream.
+ *
+ * @param {Document} doc Document containing data-role hooks.
+ * @param {Window} win Window providing browser capabilities.
+ * @param {object} [deps] Optional browser capability overrides.
+ * @param {Function} [deps.fetch] Fetch implementation for local and remote assets.
+ * @param {Function} [deps.random] Random source for decorative pacing.
+ * @param {{info: Function}} [deps.console] Diagnostic sink.
+ * @returns {{destroy: Function}} Idempotent teardown handle.
+ */
+export const initApp = (doc, win, deps = {}) => {
+    if (!doc?.querySelector || !win) {
+        throw new TypeError('document and window are required');
+    }
+
+    const diagnostics = deps.console ?? globalThis.console;
+    const random = deps.random ?? Math.random;
+    const report = (scope, error) => {
+        const message = error?.message ?? String(error);
+        diagnostics?.info?.(`[sysetup] ${scope} unavailable: ${message}`);
+    };
+    const byRole = (role) => doc.querySelector(`[data-role="${role}"]`);
+    const reducedMotion =
+        typeof win.matchMedia === 'function' &&
+        win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const handles = [];
+    const backgroundController =
+        typeof AbortController === 'function' ? new AbortController() : null;
+    const geolocationController =
+        typeof AbortController === 'function' ? new AbortController() : null;
+    const fetchImpl = deps.fetch ?? win.fetch?.bind(win);
+    let backgroundHandle = null;
+    let destroyed = false;
+
+    try {
+        outputLogo(diagnostics);
+    } catch (error) {
+        report('console logo', error);
+    }
+
+    try {
+        const dateElement = byRole('date');
+        const timeElement = byRole('time');
+        if (dateElement && timeElement) {
+            const clock = createClock({
+                dateElement,
+                timeElement,
+                document: doc,
+            });
+            clock.start();
+            handles.push(clock);
+        }
+    } catch (error) {
+        report('clock', error);
+    }
+
+    try {
+        const rotator = byRole('typewriter');
+        if (rotator) {
+            const typewriter = createTypewriter(
+                rotator,
+                shuffleMessages(HERO_MESSAGES, random),
+                {
+                    changeIntervalMs: ROTATOR_CHANGE_INTERVAL_MS,
+                    document: doc,
+                    random,
+                    reducedMotion,
+                }
+            );
+            typewriter.start();
+            handles.push(typewriter);
+        }
+    } catch (error) {
+        report('rotator', error);
+    }
+
+    try {
+        const background = byRole('background');
+        if (background && fetchImpl) {
+            loadBackground({
+                fetchImpl,
+                maxBytes: BACKGROUND_MAX_BYTES,
+                signal: backgroundController?.signal,
+                timeoutMs: BACKGROUND_TIMEOUT_MS,
+                url: BACKGROUND_URL,
+            })
+                .then((text) => {
+                    if (destroyed) return;
+                    const stream = createBackgroundStream(background, text, {
+                        document: doc,
+                        maxLinesKept: BACKGROUND_MAX_LINES,
+                        random,
+                        reducedMotion,
+                    });
+                    stream.start();
+                    backgroundHandle = stream;
+                })
+                .catch((error) => {
+                    if (!destroyed) report('background', error);
+                });
+        }
+    } catch (error) {
+        report('background', error);
+    }
+
+    try {
+        const clientLocation = byRole('client-location');
+        if (clientLocation && fetchImpl) {
+            loadGeolocationMessages({
+                fetchImpl,
+                signal: geolocationController?.signal,
+            })
+                .then((messages) => {
+                    if (destroyed || messages.length === 0) return;
+                    const typewriter = createTypewriter(
+                        clientLocation,
+                        shuffleMessages(messages, random),
+                        {
+                            document: doc,
+                            random,
+                            reducedMotion,
+                        }
+                    );
+                    typewriter.start();
+                    handles.push(typewriter);
+                })
+                .catch((error) => {
+                    if (!destroyed) report('geolocation', error);
+                });
+        }
+    } catch (error) {
+        report('geolocation', error);
+    }
+
+    return {
+        destroy() {
+            if (destroyed) return;
+            destroyed = true;
+            backgroundController?.abort();
+            geolocationController?.abort();
+            for (const handle of handles.splice(0)) handle.destroy();
+            backgroundHandle?.destroy();
+            backgroundHandle = null;
+        },
+    };
+};
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    initApp(document, window);
+}
+
+----
+
+/** Static presentation content and bounded local-asset settings. */
+
+/** Decorative messages rendered by the optional typewriter. */
+export const HERO_MESSAGES = Object.freeze([
+    'Analyzing requirements to architect robust software solutions.',
+    'Designing maintainable systems around real operational needs.',
+    'Developing custom software for clear business outcomes.',
+    'Building resilient platforms from idea to everyday operation.',
+    'Connecting thoughtful design with dependable implementation.',
+    'Maintaining useful systems through careful iteration.',
+    'Turning complex needs into practical digital products.',
+    'Supporting full-cycle projects with a human focus.',
+]);
+
+/** Fixed interval between the start of two rotator messages (milliseconds). */
+export const ROTATOR_CHANGE_INTERVAL_MS = 18_000;
+
+/** Same-origin route for the decorative plain-text asset. */
+export const BACKGROUND_URL = 'assets/background.txt';
+
+/** Maximum accepted background asset size in bytes. */
+export const BACKGROUND_MAX_BYTES = 64 * 1024;
+
+/** Maximum time allowed for the optional background request. */
+export const BACKGROUND_TIMEOUT_MS = 5000;
+
+/** Maximum number of visible background lines retained in memory. */
+export const BACKGROUND_MAX_LINES = 90;

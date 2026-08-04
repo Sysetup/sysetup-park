@@ -82,6 +82,30 @@ a {
     will-change: opacity;
 }
 
+/* Page acknowledgment. */
+.site-credit {
+    /* Positioning */
+    position: absolute;
+    z-index: 2;
+    top: 0.75rem;
+    right: 1rem;
+
+    /* Box Model */
+    max-width: min(24rem, calc(100% - 2rem));
+    margin: 0;
+
+    /* Color */
+    color: #fff;
+
+    /* Text */
+    font-size: clamp(0.65rem, 1vw, 0.8rem);
+    line-height: 1.4;
+    text-align: right;
+
+    /* Other */
+    overflow-wrap: anywhere;
+}
+
 .site-header,
 .hero {
     width: 100%;
@@ -214,6 +238,13 @@ a {
     body {
         padding: 1rem 0.75rem;
         font-size: 1rem;
+    }
+
+    .site-credit {
+        top: 0.5rem;
+        right: 0.75rem;
+        max-width: calc(100% - 1.5rem);
+        font-size: clamp(0.6rem, 2.2vw, 0.75rem);
     }
 
     .brand {

@@ -10,16 +10,18 @@ import {
 } from './content.js';
 import { createBackgroundStream } from './modules/background-stream.js';
 import { createClock } from './modules/clock.js';
+import outputLogo from './modules/console-logo.js';
 import { loadBackground } from './modules/load-background.js';
+import { loadGeolocationMessages } from './modules/load-geolocation.js';
 import { createTypewriter, shuffleMessages } from './modules/typewriter.js';
 
 /**
- * Initialize the optional clock, message rotator, and background stream.
+ * Initialize the console logo, optional clock, message rotators, and background stream.
  *
  * @param {Document} doc Document containing data-role hooks.
  * @param {Window} win Window providing browser capabilities.
  * @param {object} [deps] Optional browser capability overrides.
- * @param {Function} [deps.fetch] Fetch implementation for the local asset.
+ * @param {Function} [deps.fetch] Fetch implementation for local and remote assets.
  * @param {Function} [deps.random] Random source for decorative pacing.
  * @param {{info: Function}} [deps.console] Diagnostic sink.
  * @returns {{destroy: Function}} Idempotent teardown handle.
@@ -42,8 +44,17 @@ export const initApp = (doc, win, deps = {}) => {
     const handles = [];
     const backgroundController =
         typeof AbortController === 'function' ? new AbortController() : null;
+    const geolocationController =
+        typeof AbortController === 'function' ? new AbortController() : null;
+    const fetchImpl = deps.fetch ?? win.fetch?.bind(win);
     let backgroundHandle = null;
     let destroyed = false;
+
+    try {
+        outputLogo(diagnostics);
+    } catch (error) {
+        report('console logo', error);
+    }
 
     try {
         const dateElement = byRole('date');
@@ -83,7 +94,6 @@ export const initApp = (doc, win, deps = {}) => {
 
     try {
         const background = byRole('background');
-        const fetchImpl = deps.fetch ?? win.fetch?.bind(win);
         if (background && fetchImpl) {
             loadBackground({
                 fetchImpl,
@@ -111,11 +121,41 @@ export const initApp = (doc, win, deps = {}) => {
         report('background', error);
     }
 
+    try {
+        const clientLocation = byRole('client-location');
+        if (clientLocation && fetchImpl) {
+            loadGeolocationMessages({
+                fetchImpl,
+                signal: geolocationController?.signal,
+            })
+                .then((messages) => {
+                    if (destroyed || messages.length === 0) return;
+                    const typewriter = createTypewriter(
+                        clientLocation,
+                        shuffleMessages(messages, random),
+                        {
+                            document: doc,
+                            random,
+                            reducedMotion,
+                        }
+                    );
+                    typewriter.start();
+                    handles.push(typewriter);
+                })
+                .catch((error) => {
+                    if (!destroyed) report('geolocation', error);
+                });
+        }
+    } catch (error) {
+        report('geolocation', error);
+    }
+
     return {
         destroy() {
             if (destroyed) return;
             destroyed = true;
             backgroundController?.abort();
+            geolocationController?.abort();
             for (const handle of handles.splice(0)) handle.destroy();
             backgroundHandle?.destroy();
             backgroundHandle = null;
