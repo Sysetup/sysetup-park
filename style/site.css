@@ -353,3 +353,10 @@ a {
         padding: 0.5rem 1rem;
     }
 }
+
+/* Reserve space for the tallest typewriter message on portrait phones. */
+@media (orientation: portrait) and (width <= 575.98px) {
+    .hero-description {
+        min-height: 4.5em;
+    }
+}
