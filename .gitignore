@@ -1,4 +1,2 @@
-# Options: any valid Git ignore pattern; current: node_modules/; dependency directory at any matching level.
 node_modules/
-# Options: any valid Git ignore pattern; current: .tools/; local tool cache directory.
-.tools/
+graphify-out/
