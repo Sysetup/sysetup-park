@@ -21,11 +21,11 @@ export const HERO_MESSAGES = Object.freeze([
     'Bridging analysis to operations with clear design and maintenance docs.',
     'Coordinating cross-functional teams for system planning and upkeep.',
     'Streamlining deployments with config management and runbook automation.',
-    'Sustaining performance through lifecycle governance and audits'
+    'Sustaining performance through lifecycle governance and audits',
 ]);
 
-/** Fixed interval between the start of two rotator messages (milliseconds). */
-export const ROTATOR_CHANGE_INTERVAL_MS = 18_000;
+/** Time to keep each hero message visible after it finishes typing (milliseconds). */
+export const ROTATOR_HOLD_MS = 47_000;
 
 /** Same-origin route for the decorative plain-text asset. */
 export const BACKGROUND_URL = 'assets/background.txt';

@@ -127,6 +127,7 @@ export const createTypewriter = (element, messages, options = {}) => {
         visibility = createVisibility(documentRef),
         now = () => globalThis.performance?.now?.() ?? Date.now(),
         reducedMotion = false,
+        advanceOnInteraction = false,
     } = options;
 
     for (const [name, value] of [
@@ -137,6 +138,18 @@ export const createTypewriter = (element, messages, options = {}) => {
             throw new TypeError(`${name} must be a non-negative number`);
         }
     }
+    if (typeof advanceOnInteraction !== 'boolean') {
+        throw new TypeError('advanceOnInteraction must be a boolean');
+    }
+    if (
+        advanceOnInteraction &&
+        (typeof element.addEventListener !== 'function' ||
+            typeof element.removeEventListener !== 'function')
+    ) {
+        throw new TypeError(
+            'element must support events when interaction is enabled'
+        );
+    }
     assertFunction(scheduler.setTimeout, 'scheduler.setTimeout');
     assertFunction(scheduler.clearTimeout, 'scheduler.clearTimeout');
     assertFunction(random, 'random');
@@ -144,6 +157,7 @@ export const createTypewriter = (element, messages, options = {}) => {
     assertFunction(visibility.isHidden, 'visibility.isHidden');
     assertFunction(visibility.onChange, 'visibility.onChange');
 
+    const outputElement = element;
     const usesFixedChangeInterval = changeIntervalMs > 0;
     let timerId = null;
     let messageIndex = 0;
@@ -156,14 +170,14 @@ export const createTypewriter = (element, messages, options = {}) => {
     let paused = false;
     let destroyed = false;
     let unsubscribe = () => {};
+    let unsubscribeInteraction = () => {};
 
     const clearTimer = () => {
         if (timerId !== null) scheduler.clearTimeout(timerId);
         timerId = null;
     };
 
-    const getDelayUntilNextMessage = () =>
-        Math.max(0, nextMessageAt - now());
+    const getDelayUntilNextMessage = () => Math.max(0, nextMessageAt - now());
 
     const getDelayForCurrentState = () => {
         const message = messages[messageIndex];
@@ -200,6 +214,23 @@ export const createTypewriter = (element, messages, options = {}) => {
             return;
         }
         timerId = scheduler.setTimeout(step, Math.max(0, Math.round(delay)));
+    }
+
+    /** Skip the current message and restart the next message from its first character. */
+    function advanceToNextMessage() {
+        if (destroyed || !started) return;
+
+        clearTimer();
+        messageIndex = (messageIndex + 1) % messages.length;
+        charIndex = 0;
+        previousChar = '';
+        nextMessageAt = 0;
+        state = 'typing';
+        outputElement.textContent = reducedMotion ? messages[messageIndex] : '';
+
+        if (!reducedMotion) {
+            schedule(humanTypingDelay('', messages[messageIndex][0], random));
+        }
     }
 
     function step() {
@@ -271,10 +302,19 @@ export const createTypewriter = (element, messages, options = {}) => {
         if (!paused) schedule(getDelayForCurrentState());
     };
 
+    const handleInteraction = () => {
+        advanceToNextMessage();
+    };
+
     return {
         start() {
             if (destroyed || started) return;
             started = true;
+            if (advanceOnInteraction) {
+                element.addEventListener('click', handleInteraction);
+                unsubscribeInteraction = () =>
+                    element.removeEventListener('click', handleInteraction);
+            }
             if (reducedMotion) {
                 element.textContent = messages[0];
                 return;
@@ -299,6 +339,8 @@ export const createTypewriter = (element, messages, options = {}) => {
             clearTimer();
             unsubscribe();
             unsubscribe = () => {};
+            unsubscribeInteraction();
+            unsubscribeInteraction = () => {};
         },
     };
 };

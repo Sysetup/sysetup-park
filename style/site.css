@@ -312,23 +312,31 @@ a {
 
 .hero-description {
     /* Positioning */
+    display: block;
     position: relative;
 
     /* Box Model */
+    width: 100%;
     max-width: 52rem;
+    box-sizing: border-box;
     margin: 0;
     padding: 1rem 3rem;
+    border: 0;
 
     /* Color */
+    background: transparent;
     color: var(--color-phosphor-muted);
 
     /* Text */
+    font: inherit;
     font-size: clamp(1.15rem, 1.9vw, 2rem);
     line-height: 1.35;
+    text-align: center;
     text-shadow: 0 0 0.8rem rgb(17 236 229 / 14%);
 
     /* Other */
     animation: soft-arrival 900ms var(--ease-arrival) 260ms both;
+    cursor: pointer;
 }
 
 .contact-list {
@@ -403,7 +411,23 @@ a {
 .site-note::after,
 .ambient-code code::after {
     content: '|';
-    animation: blink 500ms linear infinite alternate;
+    animation: cursor-blink 4s ease-in-out infinite;
+}
+
+/* Offset each cursor so the interface feels observed rather than synchronized. */
+.hero-description::after {
+    animation-delay: -0.6s;
+    animation-duration: 3.6s;
+}
+
+.site-note::after {
+    animation-delay: -2.2s;
+    animation-duration: 4.4s;
+}
+
+.ambient-code code::after {
+    animation-delay: -3.3s;
+    animation-duration: 5.2s;
 }
 
 .site-footer {
@@ -484,24 +508,49 @@ a {
     transform: translateY(0);
 }
 
-@keyframes blink {
-    40% {
+@keyframes cursor-blink {
+    0%,
+    18% {
         opacity: 1;
     }
 
-    42% {
-        opacity: 0.8;
+    19% {
+        opacity: 0.56;
     }
 
-    43% {
+    20% {
         opacity: 1;
     }
 
-    45% {
-        opacity: 0.2;
+    21%,
+    29% {
+        opacity: 0.12;
     }
 
-    46% {
+    30% {
+        opacity: 0.82;
+    }
+
+    31%,
+    56% {
+        opacity: 1;
+    }
+
+    57% {
+        opacity: 0.28;
+    }
+
+    58% {
+        opacity: 0.9;
+    }
+
+    59%,
+    64% {
+        opacity: 0.18;
+    }
+
+    65%,
+    100% {
         opacity: 1;
     }
 }

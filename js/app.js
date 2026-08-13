@@ -6,7 +6,7 @@ import {
     BACKGROUND_TIMEOUT_MS,
     BACKGROUND_URL,
     HERO_MESSAGES,
-    ROTATOR_CHANGE_INTERVAL_MS,
+    ROTATOR_HOLD_MS,
 } from './content.js';
 import { createBackgroundStream } from './modules/background-stream.js';
 import { createClock } from './modules/clock.js';
@@ -79,8 +79,9 @@ export const initApp = (doc, win, deps = {}) => {
                 rotator,
                 shuffleMessages(HERO_MESSAGES, random),
                 {
-                    changeIntervalMs: ROTATOR_CHANGE_INTERVAL_MS,
+                    advanceOnInteraction: true,
                     document: doc,
+                    holdMs: ROTATOR_HOLD_MS,
                     random,
                     reducedMotion,
                 }
