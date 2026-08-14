@@ -1,10 +1,4 @@
-/** Render a bounded plain-text background stream with explicit teardown. */
-
-const defaultScheduler = {
-    setTimeout: (callback, milliseconds) =>
-        globalThis.setTimeout(callback, milliseconds),
-    clearTimeout: (timerId) => globalThis.clearTimeout(timerId),
-};
+/** Render a bounded plain-text background track with explicit teardown. */
 
 const createVisibility = (documentRef) => {
     if (!documentRef?.addEventListener) {
@@ -27,11 +21,6 @@ const assertFunction = (value, name) => {
     }
 };
 
-const boundedRandom = (random) => {
-    const value = Number(random());
-    return Number.isFinite(value) ? Math.min(Math.max(value, 0), 0.999999) : 0;
-};
-
 /** Split text into lines while normalizing common line endings. */
 export const splitBackgroundText = (text) => {
     if (typeof text !== 'string') {
@@ -40,12 +29,26 @@ export const splitBackgroundText = (text) => {
     return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
 };
 
+const createCopy = (documentRef, text) => {
+    const copy = documentRef.createElement('span');
+    copy.className = 'ambient-code-copy';
+    copy.textContent = text;
+    return copy;
+};
+
 /**
- * Create the decorative background stream.
+ * Create the decorative background track.
+ *
+ * The track contains two identical plain-text copies. CSS moves the track at
+ * a constant compositor-driven speed and loops at the exact copy boundary.
  *
  * @param {HTMLElement} element Target output element.
  * @param {string} text Plain-text corpus.
- * @param {object} [options] Pacing and lifecycle options.
+ * @param {object} [options] Lifecycle options.
+ * @param {Document} [options.document] Document used to create track nodes.
+ * @param {boolean} [options.reducedMotion=false] Disable animated movement.
+ * @param {{isHidden: Function, onChange: Function}} [options.visibility]
+ * Visibility lifecycle adapter.
  * @returns {{start: Function, stop: Function, destroy: Function}}
  */
 export const createBackgroundStream = (element, text, options = {}) => {
@@ -53,144 +56,68 @@ export const createBackgroundStream = (element, text, options = {}) => {
         throw new TypeError('element must be a DOM element');
     }
 
-    const lines = splitBackgroundText(text);
+    const normalizedText = splitBackgroundText(text).join('\n');
     const {
-        blockPauseMs = 480,
-        burstEvery = 9,
-        burstPauseMs = 900,
         document: documentRef = globalThis.document,
-        lineDelayMaxMs = 130,
-        lineDelayMinMs = 28,
-        maxLinesKept = 90,
-        maxLinesPerTick = 3,
-        minLinesPerTick = 1,
-        primeLines = 70,
-        random = Math.random,
         reducedMotion = false,
-        scheduler = defaultScheduler,
         visibility = createVisibility(documentRef),
     } = options;
 
-    const numericOptions = [
-        ['blockPauseMs', blockPauseMs],
-        ['burstEvery', burstEvery],
-        ['burstPauseMs', burstPauseMs],
-        ['lineDelayMaxMs', lineDelayMaxMs],
-        ['lineDelayMinMs', lineDelayMinMs],
-        ['maxLinesKept', maxLinesKept],
-        ['maxLinesPerTick', maxLinesPerTick],
-        ['minLinesPerTick', minLinesPerTick],
-        ['primeLines', primeLines],
-    ];
-    for (const [name, value] of numericOptions) {
-        if (!Number.isFinite(value) || value < 0) {
-            throw new TypeError(`${name} must be a non-negative number`);
-        }
+    if (typeof reducedMotion !== 'boolean') {
+        throw new TypeError('reducedMotion must be a boolean');
     }
-    if (minLinesPerTick < 1 || maxLinesPerTick < minLinesPerTick) {
-        throw new TypeError('line burst bounds are invalid');
-    }
-    if (lineDelayMaxMs < lineDelayMinMs || burstEvery < 1 || maxLinesKept < 1) {
-        throw new TypeError('background pacing bounds are invalid');
-    }
-    assertFunction(random, 'random');
-    assertFunction(scheduler.setTimeout, 'scheduler.setTimeout');
-    assertFunction(scheduler.clearTimeout, 'scheduler.clearTimeout');
     assertFunction(visibility.isHidden, 'visibility.isHidden');
     assertFunction(visibility.onChange, 'visibility.onChange');
 
-    const buffer = [];
-    let lineIndex = 0;
-    let tickCount = 0;
-    let timerId = null;
+    const outputElement = element;
+    let track = null;
     let running = false;
     let destroyed = false;
     let unsubscribe = () => {};
 
-    const clearTimer = () => {
-        if (timerId !== null) scheduler.clearTimeout(timerId);
-        timerId = null;
+    const setPaused = (paused) => {
+        if (typeof track?.classList?.toggle !== 'function') return;
+        track.classList.toggle('ambient-code-track-paused', paused);
     };
 
     const render = () => {
-        element.textContent = buffer.join('\n');
-    };
-
-    const pushLines = (count) => {
-        let startedNewBlock = false;
-        for (let index = 0; index < count; index += 1) {
-            const line = lines[lineIndex];
-            if (line === '' && lines[(lineIndex + 1) % lines.length] !== '') {
-                startedNewBlock = true;
-            }
-            buffer.push(line);
-            lineIndex = (lineIndex + 1) % lines.length;
+        const ownerDocument = outputElement.ownerDocument ?? documentRef;
+        if (
+            typeof ownerDocument?.createElement !== 'function' ||
+            typeof outputElement.appendChild !== 'function'
+        ) {
+            outputElement.textContent = normalizedText;
+            return null;
         }
-        if (buffer.length > maxLinesKept) {
-            buffer.splice(0, buffer.length - maxLinesKept);
+
+        outputElement.textContent = '';
+        const nextTrack = ownerDocument.createElement('span');
+        nextTrack.className = 'ambient-code-track';
+        nextTrack.appendChild(createCopy(ownerDocument, normalizedText));
+        if (!reducedMotion) {
+            nextTrack.appendChild(createCopy(ownerDocument, normalizedText));
         }
-        return startedNewBlock;
+        outputElement.appendChild(nextTrack);
+        return nextTrack;
     };
-
-    const nextDelay = (startedNewBlock) => {
-        tickCount += 1;
-        let delay =
-            lineDelayMinMs +
-            boundedRandom(random) * (lineDelayMaxMs - lineDelayMinMs);
-        if (startedNewBlock) {
-            delay += blockPauseMs;
-        } else if (tickCount % burstEvery === 0) {
-            delay += burstPauseMs;
-        }
-        return Math.round(delay);
-    };
-
-    function schedule(delay) {
-        clearTimer();
-        if (!running || destroyed || visibility.isHidden()) return;
-        timerId = scheduler.setTimeout(step, Math.max(0, Math.round(delay)));
-    }
-
-    function step() {
-        timerId = null;
-        if (!running || destroyed || visibility.isHidden()) return;
-        const burst =
-            minLinesPerTick +
-            Math.floor(
-                boundedRandom(random) *
-                    (maxLinesPerTick - minLinesPerTick + 1)
-            );
-        const startedNewBlock = pushLines(burst);
-        render();
-        schedule(nextDelay(startedNewBlock));
-    }
 
     const handleVisibilityChange = () => {
         if (!running) return;
-        if (visibility.isHidden()) {
-            clearTimer();
-            return;
-        }
-        schedule(lineDelayMinMs);
+        setPaused(visibility.isHidden());
     };
 
     return {
         start() {
-            if (destroyed || running || lines.length === 0) return;
-            if (reducedMotion) {
-                element.textContent = lines.join('\n');
-                return;
-            }
+            if (destroyed || running) return;
+            track = render();
             running = true;
             unsubscribe = visibility.onChange(handleVisibilityChange);
-            pushLines(Math.min(Math.floor(primeLines), lines.length));
-            render();
-            schedule(lineDelayMinMs);
+            setPaused(reducedMotion || visibility.isHidden());
         },
         stop() {
             if (!running) return;
             running = false;
-            clearTimer();
+            setPaused(true);
             unsubscribe();
             unsubscribe = () => {};
         },
@@ -198,9 +125,10 @@ export const createBackgroundStream = (element, text, options = {}) => {
             if (destroyed) return;
             destroyed = true;
             running = false;
-            clearTimer();
+            setPaused(true);
             unsubscribe();
             unsubscribe = () => {};
+            track = null;
         },
     };
 };
