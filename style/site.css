@@ -372,6 +372,12 @@ a {
     cursor: pointer;
 }
 
+.hero-description[aria-disabled='true'] {
+    /* Other */
+    cursor: wait;
+    opacity: 0.78;
+}
+
 .contact-list {
     /* Positioning */
     display: flex;
