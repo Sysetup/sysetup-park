@@ -128,6 +128,7 @@ export const createTypewriter = (element, messages, options = {}) => {
         now = () => globalThis.performance?.now?.() ?? Date.now(),
         reducedMotion = false,
         advanceOnInteraction = false,
+        onStateChange = null,
     } = options;
 
     for (const [name, value] of [
@@ -156,6 +157,9 @@ export const createTypewriter = (element, messages, options = {}) => {
     assertFunction(now, 'now');
     assertFunction(visibility.isHidden, 'visibility.isHidden');
     assertFunction(visibility.onChange, 'visibility.onChange');
+    if (onStateChange !== null) {
+        assertFunction(onStateChange, 'onStateChange');
+    }
 
     const outputElement = element;
     const usesFixedChangeInterval = changeIntervalMs > 0;
@@ -191,6 +195,14 @@ export const createTypewriter = (element, messages, options = {}) => {
             'aria-disabled',
             String(!isInteractionReady())
         );
+    };
+
+    const changeState = (nextState) => {
+        state = nextState;
+        updateInteractionState();
+        if (typeof onStateChange === 'function') {
+            onStateChange(state, outputElement);
+        }
     };
 
     const clearTimer = () => {
@@ -246,9 +258,8 @@ export const createTypewriter = (element, messages, options = {}) => {
         charIndex = 0;
         previousChar = '';
         nextMessageAt = 0;
-        state = reducedMotion ? 'holding' : 'typing';
         outputElement.textContent = reducedMotion ? messages[messageIndex] : '';
-        updateInteractionState();
+        changeState(reducedMotion ? 'holding' : 'typing');
 
         if (!reducedMotion) {
             schedule(humanTypingDelay('', messages[messageIndex][0], random));
@@ -281,16 +292,14 @@ export const createTypewriter = (element, messages, options = {}) => {
                     humanTypingDelay(previousChar, message[charIndex], random)
                 );
             } else {
-                state = 'holding';
-                updateInteractionState();
+                changeState('holding');
                 schedule(getDelayForCurrentState());
             }
             return;
         }
 
         if (state === 'holding') {
-            state = 'erasing';
-            updateInteractionState();
+            changeState('erasing');
             schedule(ERASE_CHAR_MS);
             return;
         }
@@ -304,8 +313,7 @@ export const createTypewriter = (element, messages, options = {}) => {
         messageIndex = (messageIndex + 1) % messages.length;
         charIndex = 0;
         previousChar = '';
-        state = 'typing';
-        updateInteractionState();
+        changeState('typing');
         schedule(
             usesFixedChangeInterval
                 ? getDelayUntilNextMessage()
@@ -342,13 +350,12 @@ export const createTypewriter = (element, messages, options = {}) => {
                     element.removeEventListener('click', handleInteraction);
             }
             if (reducedMotion) {
-                state = 'holding';
                 element.textContent = messages[0];
-                updateInteractionState();
+                changeState('holding');
                 return;
             }
             element.textContent = '';
-            updateInteractionState();
+            changeState('typing');
             unsubscribe = visibility.onChange(handleVisibilityChange);
             schedule(humanTypingDelay('', messages[0][0], random));
         },

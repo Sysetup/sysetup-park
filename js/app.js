@@ -84,6 +84,13 @@ export const initApp = (doc, win, deps = {}) => {
                     holdMs: ROTATOR_HOLD_MS,
                     random,
                     reducedMotion,
+                    onStateChange: (state) => {
+                        if (state === 'holding') {
+                            rotator.classList.add('shimmer-active');
+                        } else {
+                            rotator.classList.remove('shimmer-active');
+                        }
+                    },
                 }
             );
             typewriter.start();
