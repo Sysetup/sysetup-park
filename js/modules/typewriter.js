@@ -3,6 +3,10 @@
 const TYPE_CHAR_MS = 68;
 const ERASE_CHAR_MS = 18;
 const MIN_TYPE_DELAY_MS = 32;
+const SHIMMER_CHARACTER_STEP_MS = 34;
+const SHIMMER_WORD_PAUSE_MS = 72;
+const SHIMMER_CHARACTER_CLASS = 'typewriter-character';
+const SHIMMER_WORD_CLASS = 'typewriter-word';
 
 const defaultScheduler = {
     setTimeout: (callback, milliseconds) =>
@@ -34,6 +38,62 @@ const assertFunction = (value, name) => {
 const boundedRandom = (random) => {
     const value = Number(random());
     return Number.isFinite(value) ? Math.min(Math.max(value, 0), 0.999999) : 0;
+};
+
+/**
+ * Prepare the completed message for a chronological character shimmer.
+ *
+ * @param {HTMLElement} element Typewriter output element.
+ * @param {Document} documentRef Document used to create safe text nodes.
+ * @returns {void}
+ */
+const prepareShimmerText = (element, documentRef) => {
+    const ownerDocument = element.ownerDocument ?? documentRef;
+    if (
+        !ownerDocument ||
+        typeof ownerDocument.createDocumentFragment !== 'function' ||
+        typeof ownerDocument.createElement !== 'function' ||
+        typeof ownerDocument.createTextNode !== 'function' ||
+        typeof element.replaceChildren !== 'function'
+    ) {
+        return;
+    }
+
+    const tokens = (element.textContent ?? '').match(/\s+|\S+/gu) ?? [];
+    const fragment = ownerDocument.createDocumentFragment();
+    let characterIndex = 0;
+    let wordIndex = 0;
+
+    tokens.forEach((token) => {
+        if (/^\s+$/u.test(token)) {
+            fragment.append(ownerDocument.createTextNode(token));
+            return;
+        }
+
+        const wordElement = ownerDocument.createElement('span');
+        wordElement.className = SHIMMER_WORD_CLASS;
+
+        Array.from(token).forEach((character) => {
+            const characterElement = ownerDocument.createElement('span');
+            const delayMs =
+                characterIndex * SHIMMER_CHARACTER_STEP_MS +
+                wordIndex * SHIMMER_WORD_PAUSE_MS;
+
+            characterElement.className = SHIMMER_CHARACTER_CLASS;
+            characterElement.textContent = character;
+            characterElement.style.setProperty(
+                '--shimmer-delay',
+                `${delayMs}ms`
+            );
+            wordElement.append(characterElement);
+            characterIndex += 1;
+        });
+
+        fragment.append(wordElement);
+        wordIndex += 1;
+    });
+
+    element.replaceChildren(fragment);
 };
 
 /**
@@ -292,6 +352,7 @@ export const createTypewriter = (element, messages, options = {}) => {
                     humanTypingDelay(previousChar, message[charIndex], random)
                 );
             } else {
+                prepareShimmerText(outputElement, documentRef);
                 changeState('holding');
                 schedule(getDelayForCurrentState());
             }
