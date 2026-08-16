@@ -86,9 +86,111 @@ export const initApp = (doc, win, deps = {}) => {
                     reducedMotion,
                     onStateChange: (state) => {
                         if (state === 'holding') {
-                            rotator.classList.add('shimmer-active');
+                            if (reducedMotion) return;
+                            if (
+                                typeof rotator.getBoundingClientRect !== 'function' ||
+                                typeof doc.createElement !== 'function'
+                            ) {
+                                return;
+                            }
+
+                            const originalText = rotator.textContent;
+                            rotator.textContent = '';
+
+                            const words = originalText.trim().split(/\s+/);
+                            const wordSpans = words.map((word) => {
+                                const span = doc.createElement('span');
+                                span.textContent = word;
+                                span.style.display = 'inline-block';
+                                rotator.appendChild(span);
+                                rotator.appendChild(doc.createTextNode(' '));
+                                return span;
+                            });
+
+                            const lines = [];
+                            let currentLine = [];
+                            let currentTop = -1;
+
+                            wordSpans.forEach((span) => {
+                                const rect = span.getBoundingClientRect();
+                                const top = Math.round(rect.top);
+
+                                if (currentTop === -1) {
+                                    currentTop = top;
+                                    currentLine.push(span);
+                                } else if (Math.abs(top - currentTop) < 8) {
+                                    currentLine.push(span);
+                                } else {
+                                    lines.push(currentLine);
+                                    currentLine = [span];
+                                    currentTop = top;
+                                }
+                            });
+                            if (currentLine.length > 0) {
+                                lines.push(currentLine);
+                            }
+
+                            rotator.textContent = '';
+                            const lineElements = lines.map((lineSpans, idx) => {
+                                const lineSpan = doc.createElement('span');
+                                lineSpan.className = 'shimmer-line';
+                                lineSpan.style.display = 'inline-block';
+                                lineSpan.textContent = lineSpans
+                                    .map((s) => s.textContent)
+                                    .join(' ');
+                                rotator.appendChild(lineSpan);
+                                if (idx < lines.length - 1) {
+                                    rotator.appendChild(doc.createElement('br'));
+                                }
+                                return lineSpan;
+                            });
+
+                            let currentIndex = 0;
+                            let activeState = true;
+
+                            rotator._cancelShimmerSequence = () => {
+                                activeState = false;
+                            };
+
+                            const playNext = () => {
+                                if (!activeState) return;
+
+                                lineElements.forEach((line) =>
+                                    line.classList.remove('shimmer-active-row')
+                                );
+
+                                if (lineElements.length === 0) return;
+
+                                const line = lineElements[currentIndex];
+                                if (!line) return;
+
+                                line.classList.add('shimmer-active-row');
+
+                                line.addEventListener(
+                                    'animationend',
+                                    () => {
+                                        if (!activeState) return;
+                                        currentIndex =
+                                            (currentIndex + 1) %
+                                            lineElements.length;
+                                        playNext();
+                                    },
+                                    { once: true }
+                                );
+                            };
+
+                            playNext();
                         } else {
-                            rotator.classList.remove('shimmer-active');
+                            if (typeof rotator._cancelShimmerSequence === 'function') {
+                                rotator._cancelShimmerSequence();
+                                rotator._cancelShimmerSequence = null;
+                            }
+                            if (typeof rotator.querySelectorAll === 'function') {
+                                const lines = rotator.querySelectorAll('.shimmer-line');
+                                lines.forEach((line) =>
+                                    line.classList.remove('shimmer-active-row')
+                                );
+                            }
                         }
                     },
                 }

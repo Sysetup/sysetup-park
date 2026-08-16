@@ -378,7 +378,15 @@ a {
     opacity: 0.78;
 }
 
-.hero-description.shimmer-active {
+.shimmer-line {
+    /* Positioning */
+    display: inline-block;
+
+    /* Color */
+    color: var(--color-phosphor-muted);
+}
+
+.shimmer-line.shimmer-active-row {
     /* Box Model */
     background-color: transparent;
     background-image: linear-gradient(
@@ -396,17 +404,10 @@ a {
     text-shadow: none;
 
     /* Other */
-    animation: text-shimmer 2.2s linear infinite;
+    animation: text-shimmer-row 1.2s linear;
 }
 
-.hero-description.shimmer-active::after {
-    /* Text */
-    -webkit-text-fill-color: var(--color-phosphor);
-    color: var(--color-phosphor);
-    text-shadow: 0 0 0.8em rgb(17 236 229 / 55%);
-}
-
-@keyframes text-shimmer {
+@keyframes text-shimmer-row {
     0% {
         background-position: 100% center;
     }
@@ -700,7 +701,7 @@ a {
         will-change: auto;
     }
 
-    .hero-description.shimmer-active {
+    .shimmer-line.shimmer-active-row {
         background-image: none;
         -webkit-text-fill-color: var(--color-phosphor-muted);
         text-shadow: 0 0 0.8rem rgb(17 236 229 / 14%);
