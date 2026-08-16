@@ -1,8 +1,13 @@
 /** Render decorative messages with a small, lifecycle-safe state machine. */
 
-const TYPE_CHAR_MS = 68;
-const ERASE_CHAR_MS = 18;
-const MIN_TYPE_DELAY_MS = 32;
+const TYPE_CHAR_MS = 34;
+const ERASE_CHAR_MS = 24;
+const TYPE_VARIATION_MS = 8;
+const FIRST_CHARACTER_PAUSE_MS = 80;
+const WORD_BOUNDARY_PAUSE_MS = 12;
+const CLAUSE_PAUSE_MS = 48;
+const SENTENCE_PAUSE_MS = 92;
+const MIN_TYPE_DELAY_MS = 24;
 const SHIMMER_CHARACTER_STEP_MS = 34;
 const SHIMMER_WORD_PAUSE_MS = 72;
 const SHIMMER_REST_MS = 7000;
@@ -109,7 +114,7 @@ const prepareShimmerText = (element, documentRef) => {
 };
 
 /**
- * Return a natural-feeling delay before the next character.
+ * Return a steady, readable delay before the next character.
  *
  * @param {string} previous Character just rendered.
  * @param {string} next Character about to be rendered.
@@ -118,23 +123,16 @@ const prepareShimmerText = (element, documentRef) => {
  */
 export const humanTypingDelay = (previous, next, random = Math.random) => {
     assertFunction(random, 'random');
-    let delay = TYPE_CHAR_MS + (boundedRandom(random) - 0.5) * 24;
+    let delay =
+        TYPE_CHAR_MS + (boundedRandom(random) - 0.5) * TYPE_VARIATION_MS;
     const nextCharacter = typeof next === 'string' ? next : '';
 
-    if (previous === '') delay += 120 + boundedRandom(random) * 140;
-    if (nextCharacter === ' ') delay += 30 + boundedRandom(random) * 45;
-    if (previous === ' ') delay += 35 + boundedRandom(random) * 65;
+    if (previous === '') delay += FIRST_CHARACTER_PAUSE_MS;
+    if (nextCharacter === ' ') delay += WORD_BOUNDARY_PAUSE_MS;
     if ('.:!?'.includes(previous)) {
-        delay += 180 + boundedRandom(random) * 180;
+        delay += SENTENCE_PAUSE_MS;
     } else if (',;'.includes(previous)) {
-        delay += 80 + boundedRandom(random) * 110;
-    }
-    if (boundedRandom(random) < 0.08) {
-        delay += 180 + boundedRandom(random) * 300;
-    }
-    if (boundedRandom(random) < 0.12) delay *= 0.55;
-    if (/[A-Z0-9]/.test(nextCharacter) && boundedRandom(random) < 0.08) {
-        delay += 180 + boundedRandom(random) * 240;
+        delay += CLAUSE_PAUSE_MS;
     }
     return Math.max(MIN_TYPE_DELAY_MS, Math.round(delay));
 };
@@ -203,14 +201,14 @@ export const createTypewriter = (element, messages, options = {}) => {
         onStateChange = null,
     } = options;
 
-    for (const [name, value] of [
+    [
         ['holdMs', holdMs],
         ['changeIntervalMs', changeIntervalMs],
-    ]) {
+    ].forEach(([name, value]) => {
         if (!Number.isFinite(value) || value < 0) {
             throw new TypeError(`${name} must be a non-negative number`);
         }
-    }
+    });
     if (typeof advanceOnInteraction !== 'boolean') {
         throw new TypeError('advanceOnInteraction must be a boolean');
     }
@@ -234,6 +232,7 @@ export const createTypewriter = (element, messages, options = {}) => {
     }
 
     const outputElement = element;
+    const [firstMessage] = messages;
     const usesFixedChangeInterval = changeIntervalMs > 0;
     let timerId = null;
     let messageIndex = 0;
@@ -288,7 +287,7 @@ export const createTypewriter = (element, messages, options = {}) => {
         const message = messages[messageIndex];
         if (state === 'typing') {
             const isStartingMessage =
-                charIndex === 0 && element.textContent === '';
+                charIndex === 0 && outputElement.textContent === '';
             if (usesFixedChangeInterval && isStartingMessage && nextMessageAt) {
                 return getDelayUntilNextMessage();
             }
@@ -301,28 +300,16 @@ export const createTypewriter = (element, messages, options = {}) => {
         if (state === 'holding') {
             if (!usesFixedChangeInterval) return holdMs;
             const eraseDuration =
-                (element.textContent.length + 1) * ERASE_CHAR_MS;
+                (outputElement.textContent.length + 1) * ERASE_CHAR_MS;
             return Math.max(0, getDelayUntilNextMessage() - eraseDuration);
         }
         return ERASE_CHAR_MS;
     };
 
-    function schedule(delay) {
-        clearTimer();
-        if (
-            destroyed ||
-            paused ||
-            !started ||
-            reducedMotion ||
-            visibility.isHidden()
-        ) {
-            return;
-        }
-        timerId = scheduler.setTimeout(step, Math.max(0, Math.round(delay)));
-    }
+    let schedule = () => {};
 
-    /** Skip the current message and restart the next message from its first character. */
-    function advanceToNextMessage() {
+    /** Advance immediately only when reduced motion is active. */
+    function advanceWithoutMotion() {
         if (destroyed || !started) return;
 
         clearTimer();
@@ -330,22 +317,35 @@ export const createTypewriter = (element, messages, options = {}) => {
         charIndex = 0;
         previousChar = '';
         nextMessageAt = 0;
-        outputElement.textContent = reducedMotion ? messages[messageIndex] : '';
-        changeState(reducedMotion ? 'holding' : 'typing');
-
-        if (!reducedMotion) {
-            schedule(humanTypingDelay('', messages[messageIndex][0], random));
-        }
+        outputElement.textContent = messages[messageIndex];
+        changeState('holding');
     }
 
-    function step() {
+    /** Start the shared erase phase for autonomous and interactive transitions. */
+    function beginErasing() {
+        if (
+            destroyed ||
+            !started ||
+            paused ||
+            reducedMotion ||
+            state !== 'holding'
+        ) {
+            return;
+        }
+
+        clearTimer();
+        changeState('erasing');
+        schedule(ERASE_CHAR_MS);
+    }
+
+    const step = () => {
         timerId = null;
         if (destroyed || paused || visibility.isHidden()) return;
 
         const message = messages[messageIndex];
         if (state === 'typing') {
             const isStartingMessage =
-                charIndex === 0 && element.textContent === '';
+                charIndex === 0 && outputElement.textContent === '';
             if (usesFixedChangeInterval && isStartingMessage) {
                 const currentTime = now();
                 if (nextMessageAt > currentTime) {
@@ -356,7 +356,7 @@ export const createTypewriter = (element, messages, options = {}) => {
             }
 
             const character = message[charIndex];
-            element.textContent += character;
+            outputElement.textContent += character;
             previousChar = character;
             charIndex += 1;
             if (charIndex < message.length) {
@@ -372,13 +372,12 @@ export const createTypewriter = (element, messages, options = {}) => {
         }
 
         if (state === 'holding') {
-            changeState('erasing');
-            schedule(ERASE_CHAR_MS);
+            beginErasing();
             return;
         }
 
-        if (element.textContent.length > 0) {
-            element.textContent = element.textContent.slice(0, -1);
+        if (outputElement.textContent.length > 0) {
+            outputElement.textContent = outputElement.textContent.slice(0, -1);
             schedule(ERASE_CHAR_MS);
             return;
         }
@@ -392,7 +391,21 @@ export const createTypewriter = (element, messages, options = {}) => {
                 ? getDelayUntilNextMessage()
                 : humanTypingDelay('', messages[messageIndex][0], random)
         );
-    }
+    };
+
+    schedule = (delay) => {
+        clearTimer();
+        if (
+            destroyed ||
+            paused ||
+            !started ||
+            reducedMotion ||
+            visibility.isHidden()
+        ) {
+            return;
+        }
+        timerId = scheduler.setTimeout(step, Math.max(0, Math.round(delay)));
+    };
 
     const handleVisibilityChange = () => {
         if (visibility.isHidden()) {
@@ -410,7 +423,11 @@ export const createTypewriter = (element, messages, options = {}) => {
 
     const handleInteraction = () => {
         if (!isInteractionReady()) return;
-        advanceToNextMessage();
+        if (reducedMotion) {
+            advanceWithoutMotion();
+            return;
+        }
+        beginErasing();
     };
 
     return {
@@ -418,16 +435,19 @@ export const createTypewriter = (element, messages, options = {}) => {
             if (destroyed || started) return;
             started = true;
             if (advanceOnInteraction) {
-                element.addEventListener('click', handleInteraction);
+                outputElement.addEventListener('click', handleInteraction);
                 unsubscribeInteraction = () =>
-                    element.removeEventListener('click', handleInteraction);
+                    outputElement.removeEventListener(
+                        'click',
+                        handleInteraction
+                    );
             }
             if (reducedMotion) {
-                element.textContent = messages[0];
+                outputElement.textContent = firstMessage;
                 changeState('holding');
                 return;
             }
-            element.textContent = '';
+            outputElement.textContent = '';
             changeState('typing');
             unsubscribe = visibility.onChange(handleVisibilityChange);
             schedule(humanTypingDelay('', messages[0][0], random));

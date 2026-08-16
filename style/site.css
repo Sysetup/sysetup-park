@@ -370,6 +370,10 @@ a {
     /* Other */
     animation: soft-arrival 900ms var(--ease-arrival) 260ms both;
     cursor: pointer;
+    transition:
+        color 420ms var(--ease-arrival),
+        text-shadow 420ms var(--ease-arrival),
+        opacity 180ms ease;
 }
 
 .hero-description[aria-disabled='true'] {
@@ -734,7 +738,8 @@ a {
     }
 
     .contact-link,
-    .contact-link::after {
+    .contact-link::after,
+    .hero-description {
         transition-duration: 0ms;
     }
 }
