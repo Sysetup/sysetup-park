@@ -396,11 +396,12 @@ a {
     vertical-align: baseline;
 }
 
-/* The shimmer is a bounded light pulse that travels through the actual glyphs. */
+/* The shimmer is an infinite light pulse that travels through the actual glyphs. */
 .hero-description.shimmer-active .typewriter-character {
     animation-delay: var(--shimmer-delay, 0ms);
-    animation-duration: 720ms;
+    animation-duration: var(--shimmer-cycle, 4s);
     animation-fill-mode: both;
+    animation-iteration-count: infinite;
     animation-name: character-shimmer;
     animation-timing-function: var(--ease-arrival);
 }
@@ -413,21 +414,20 @@ a {
 
 @keyframes character-shimmer {
     0%,
+    10%,
     100% {
         color: var(--color-phosphor-muted);
         filter: brightness(1);
         text-shadow: none;
-        transform: translateY(0);
     }
 
-    32% {
+    5% {
         color: var(--color-ice);
         filter: brightness(1.35);
         text-shadow:
             0 0 0.25em var(--color-ice),
             0 0 0.8em var(--color-phosphor),
             0 0 1.4em rgb(17 236 229 / 48%);
-        transform: translateY(-0.025em);
     }
 }
 
@@ -725,7 +725,6 @@ a {
         animation: none;
         filter: none;
         text-shadow: none;
-        transform: none;
     }
 
     .ambient-code-track {

@@ -5,6 +5,8 @@ const ERASE_CHAR_MS = 18;
 const MIN_TYPE_DELAY_MS = 32;
 const SHIMMER_CHARACTER_STEP_MS = 34;
 const SHIMMER_WORD_PAUSE_MS = 72;
+const SHIMMER_REST_MS = 7000;
+const SHIMMER_LIGHT_END_RATIO = 0.1;
 const SHIMMER_CHARACTER_CLASS = 'typewriter-character';
 const SHIMMER_WORD_CLASS = 'typewriter-word';
 
@@ -93,6 +95,16 @@ const prepareShimmerText = (element, documentRef) => {
         wordIndex += 1;
     });
 
+    const lastDelayMs =
+        characterIndex > 0
+            ? (characterIndex - 1) * SHIMMER_CHARACTER_STEP_MS +
+              Math.max(wordIndex - 1, 0) * SHIMMER_WORD_PAUSE_MS
+            : 0;
+    const shimmerCycleMs = Math.ceil(
+        (lastDelayMs + SHIMMER_REST_MS) / (1 - SHIMMER_LIGHT_END_RATIO)
+    );
+
+    element.style.setProperty('--shimmer-cycle', `${shimmerCycleMs}ms`);
     element.replaceChildren(fragment);
 };
 
