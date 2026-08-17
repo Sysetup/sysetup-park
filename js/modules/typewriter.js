@@ -14,6 +14,7 @@ const SHIMMER_REST_MS = 7000;
 const SHIMMER_LIGHT_END_RATIO = 0.1;
 const SHIMMER_CHARACTER_CLASS = 'typewriter-character';
 const SHIMMER_WORD_CLASS = 'typewriter-word';
+const TYPEWRITER_TEXT_SELECTOR = '[data-role="typewriter-text"]';
 
 const defaultScheduler = {
     setTimeout: (callback, milliseconds) =>
@@ -231,7 +232,11 @@ export const createTypewriter = (element, messages, options = {}) => {
         assertFunction(onStateChange, 'onStateChange');
     }
 
-    const outputElement = element;
+    const nestedOutputElement =
+        typeof element.querySelector === 'function'
+            ? element.querySelector(TYPEWRITER_TEXT_SELECTOR)
+            : null;
+    const outputElement = nestedOutputElement ?? element;
     const [firstMessage] = messages;
     const usesFixedChangeInterval = changeIntervalMs > 0;
     let timerId = null;
@@ -258,21 +263,18 @@ export const createTypewriter = (element, messages, options = {}) => {
     const updateInteractionState = () => {
         if (
             !advanceOnInteraction ||
-            typeof outputElement.setAttribute !== 'function'
+            typeof element.setAttribute !== 'function'
         ) {
             return;
         }
-        outputElement.setAttribute(
-            'aria-disabled',
-            String(!isInteractionReady())
-        );
+        element.setAttribute('aria-disabled', String(!isInteractionReady()));
     };
 
     const changeState = (nextState) => {
         state = nextState;
         updateInteractionState();
         if (typeof onStateChange === 'function') {
-            onStateChange(state, outputElement);
+            onStateChange(state, element);
         }
     };
 
@@ -435,12 +437,9 @@ export const createTypewriter = (element, messages, options = {}) => {
             if (destroyed || started) return;
             started = true;
             if (advanceOnInteraction) {
-                outputElement.addEventListener('click', handleInteraction);
+                element.addEventListener('click', handleInteraction);
                 unsubscribeInteraction = () =>
-                    outputElement.removeEventListener(
-                        'click',
-                        handleInteraction
-                    );
+                    element.removeEventListener('click', handleInteraction);
             }
             if (reducedMotion) {
                 outputElement.textContent = firstMessage;

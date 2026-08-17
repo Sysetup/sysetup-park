@@ -340,21 +340,25 @@ a {
 
 .hero-description {
     /* Positioning */
-    display: block;
+    display: flex;
     position: relative;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 
     /* Box Model */
 
-    /* Reserve three rendered lines so centered siblings keep their position. */
+    /* Reserve three rendered lines and keep the viewport stable during reflow. */
     --hero-description-padding-block: 2rem;
 
     width: 100%;
     max-width: 52rem;
     box-sizing: border-box;
-    min-height: calc(4.05em + var(--hero-description-padding-block));
+    height: calc(4.05em + var(--hero-description-padding-block));
     margin: 0;
     padding: 1rem 3rem;
     border: 0;
+    overflow: hidden;
 
     /* Color */
     background: transparent;
@@ -374,6 +378,13 @@ a {
         color 420ms var(--ease-arrival),
         text-shadow 420ms var(--ease-arrival),
         opacity 180ms ease;
+}
+
+/* Keep the typewriter's inline wrapping inside the fixed viewport. */
+.hero-description-text {
+    display: block;
+    width: 100%;
+    min-width: 0;
 }
 
 .hero-description[aria-disabled='true'] {
