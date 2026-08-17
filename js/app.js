@@ -9,6 +9,7 @@ import {
     ROTATOR_HOLD_MS,
 } from './content.js';
 import { createBackgroundStream } from './modules/background-stream.js';
+import { createBrandCursor } from './modules/brand-cursor.js';
 import { createClock } from './modules/clock.js';
 import outputLogo from './modules/console-logo.js';
 import { loadBackground } from './modules/load-background.js';
@@ -54,6 +55,21 @@ export const initApp = (doc, win, deps = {}) => {
         outputLogo(diagnostics);
     } catch (error) {
         report('console logo', error);
+    }
+
+    try {
+        const brandCursor = byRole('brand-cursor');
+        if (brandCursor) {
+            handles.push(
+                createBrandCursor(brandCursor, {
+                    document: doc,
+                    window: win,
+                    reducedMotion,
+                })
+            );
+        }
+    } catch (error) {
+        report('brand cursor', error);
     }
 
     try {

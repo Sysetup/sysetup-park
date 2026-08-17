@@ -299,7 +299,9 @@ a {
 
 .brand {
     /* Positioning */
-    display: inline-block;
+    display: inline-flex;
+    align-items: flex-start;
+    justify-content: center;
 
     /* Box Model */
     margin: 0 auto 1.5rem;
@@ -327,15 +329,119 @@ a {
     animation: brand-arrival 1s var(--ease-arrival) 60ms both;
 }
 
-.brand-sup {
+.brand-word {
+    display: inline-block;
+}
+
+/* Automan-inspired Cursor: a small WebGL sculpture that replaces the old
+   superscript asterisk while preserving the asterisk as a no-WebGL fallback. */
+.brand-cursor {
+    /* ================================================================
+       CURSOR 3D — CENTRALIZED TUNING
+
+       These are the only values normally needed to reposition or tune
+       the mark. JavaScript reads the WebGL-related values from here.
+
+       --cursor-size            Outer layout size relative to the brand.
+       --cursor-x / --cursor-y  Visual offset without changing document flow.
+       --cursor-render-scale    3D sculpture scale inside its canvas.
+       --cursor-glow            0 = subdued, 1 = default, 2 = intense.
+       --cursor-rotation-speed  0 = static, .5 = half speed, 2 = double speed.
+       ================================================================ */
+    --cursor-size: 0.18em;
+    --cursor-x: -0.015em;
+    --cursor-y: -0.08em;
+    --cursor-render-scale: 0.7;
+    --cursor-glow: 2;
+    --cursor-rotation-speed: 11;
+
+    /* Runtime values controlled by the renderer; do not tune these. */
+    --brand-cursor-inner-opacity: 0.78;
+    --brand-cursor-outer-opacity: 0.58;
+    --brand-cursor-canvas-brightness: 1;
+
     position: relative;
-    top: -0.7em;
-    left: -1em;
-    font-size: 47%;
-    line-height: 0;
-    vertical-align: baseline;
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: var(--cursor-size);
+    height: var(--cursor-size);
+    margin-left: 0;
+    transform: translate(var(--cursor-x), var(--cursor-y));
+    isolation: isolate;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.brand-cursor::before,
+.brand-cursor::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.brand-cursor::before {
+    inset: 12%;
+    background: radial-gradient(
+        circle,
+        rgb(245 255 255 / 48%) 0%,
+        rgb(17 236 229 / 36%) 24%,
+        rgb(17 236 229 / 7%) 46%,
+        transparent 72%
+    );
+    filter: blur(0.08em);
+    opacity: var(--brand-cursor-inner-opacity);
+}
+
+.brand-cursor::after {
+    inset: -28%;
+    background: radial-gradient(
+        circle,
+        rgb(17 236 229 / 13%) 0%,
+        rgb(17 236 229 / 4%) 35%,
+        transparent 70%
+    );
+    filter: blur(0.14em);
+    opacity: var(--brand-cursor-outer-opacity);
+}
+
+.brand-cursor-canvas {
+    position: absolute;
+    z-index: 1;
+    inset: -18%;
+    display: block;
+    width: 136%;
+    height: 136%;
+    opacity: 0;
+    filter:
+        brightness(var(--brand-cursor-canvas-brightness))
+        drop-shadow(0 0 0.035em rgb(245 255 255 / 95%))
+        drop-shadow(0 0 0.12em rgb(17 236 229 / 72%))
+        drop-shadow(0 0 0.32em rgb(17 236 229 / 34%));
+    transition: opacity 240ms var(--ease-arrival);
+}
+
+.brand-cursor-fallback {
+    position: relative;
+    z-index: 0;
+    top: -0.13em;
     color: var(--color-phosphor);
-    text-shadow: 0 0 0.8em rgb(17 236 229 / 55%);
+    font-size: 0.3em;
+    line-height: 1;
+    text-shadow:
+        0 0 0.12em var(--color-ice),
+        0 0 0.8em rgb(17 236 229 / 55%);
+    transition: opacity 120ms ease;
+}
+
+.brand-cursor-ready .brand-cursor-canvas {
+    opacity: 1;
+}
+
+.brand-cursor-ready .brand-cursor-fallback {
+    opacity: 0;
 }
 
 .hero-description {
@@ -366,7 +472,7 @@ a {
 
     /* Text */
     font: inherit;
-    font-size: clamp(1.15rem, 1.9vw, 2rem);
+    font-size: clamp(1.15rem, 1.9vw, 1.7rem);
     line-height: 1.35;
     text-align: left;
     text-shadow: 0 0 0.8rem rgb(17 236 229 / 14%);
@@ -752,6 +858,11 @@ a {
         animation: none;
         transform: none;
         will-change: auto;
+    }
+
+    .brand-cursor-canvas,
+    .brand-cursor-fallback {
+        transition: none;
     }
 
     .contact-link,
