@@ -380,11 +380,16 @@ a {
         opacity 180ms ease;
 }
 
-/* Keep the typewriter's inline wrapping inside the fixed viewport. */
+/* Fill each line up to the right edge and continue mid-word on the next
+   line, so the typing caret advances continuously instead of jumping ahead
+   word by word. */
 .hero-description-text {
     display: block;
     width: 100%;
     min-width: 0;
+
+    /* Text */
+    /*word-break: break-all;*/
 }
 
 .hero-description[aria-disabled='true'] {
@@ -399,14 +404,14 @@ a {
     text-shadow: none;
 }
 
-/* Keep each word intact while its character children retain logical reading order. */
+/* Words stay plain inline boxes so the completed phrase wraps exactly like
+   the character-by-character typing phase (no reflow when the shimmer starts). */
 .typewriter-word {
-    display: inline-block;
-    white-space: nowrap;
+    display: inline;
 }
 
 .typewriter-character {
-    display: inline-block;
+    display: inline;
     color: inherit;
     vertical-align: baseline;
 }
@@ -421,22 +426,23 @@ a {
     animation-timing-function: var(--ease-arrival);
 }
 
-.hero-description.shimmer-active::after {
+.hero-description.shimmer-active .hero-description-text::after {
     /* Text */
     color: var(--color-phosphor);
     text-shadow: 0 0 0.8em rgb(17 236 229 / 55%);
 }
 
+/* The lit window (1%) must match SHIMMER_LIGHT_END_RATIO in js/modules/typewriter.js. */
 @keyframes character-shimmer {
     0%,
-    10%,
+    1%,
     100% {
         color: var(--color-phosphor-muted);
         filter: brightness(1);
         text-shadow: none;
     }
 
-    5% {
+    0.5% {
         color: var(--color-ice);
         filter: brightness(1.35);
         text-shadow:
@@ -514,14 +520,14 @@ a {
     transform: scaleX(1);
 }
 
-.hero-description::after,
+.hero-description-text::after,
 .site-note::after {
     content: '|';
     animation: cursor-blink 4s ease-in-out infinite;
 }
 
 /* Offset each cursor so the interface feels observed rather than synchronized. */
-.hero-description::after {
+.hero-description-text::after {
     animation-delay: -0.6s;
     animation-duration: 3.6s;
 }
@@ -707,7 +713,7 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .hero-description::after,
+    .hero-description-text::after,
     .site-note::after,
     .ambient-code code,
     .site-main,

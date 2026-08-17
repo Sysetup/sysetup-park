@@ -8,10 +8,13 @@ const WORD_BOUNDARY_PAUSE_MS = 12;
 const CLAUSE_PAUSE_MS = 48;
 const SENTENCE_PAUSE_MS = 92;
 const MIN_TYPE_DELAY_MS = 24;
-const SHIMMER_CHARACTER_STEP_MS = 34;
-const SHIMMER_WORD_PAUSE_MS = 72;
-const SHIMMER_REST_MS = 7000;
-const SHIMMER_LIGHT_END_RATIO = 0.1;
+/* The light sweeps the whole phrase in under a second, then rests in the dark
+   so the repeat period stays around eleven seconds, as before. The lit window
+   ratio must match the character-shimmer keyframes in style/site.css. */
+const SHIMMER_CHARACTER_STEP_MS = 9;
+const SHIMMER_WORD_PAUSE_MS = 18;
+const SHIMMER_REST_MS = 10110;
+const SHIMMER_LIGHT_END_RATIO = 0.01;
 const SHIMMER_CHARACTER_CLASS = 'typewriter-character';
 const SHIMMER_WORD_CLASS = 'typewriter-word';
 const TYPEWRITER_TEXT_SELECTOR = '[data-role="typewriter-text"]';
